@@ -1,6 +1,6 @@
 # Production AWS EKS Platform
 
-A production-style DevOps platform built as a single monorepo. This project demonstrates the complete lifecycle of a containerized application—from development and infrastructure provisioning to Kubernetes deployment, GitOps, observability, and AI-assisted DevOps operations.
+A production-style DevOps platform built as a single monorepo. This project demonstrates the complete lifecycle of a containerized application—from application development and infrastructure provisioning to Kubernetes deployment, GitOps, observability, security, and AI-assisted DevOps operations.
 
 ---
 
@@ -8,7 +8,7 @@ A production-style DevOps platform built as a single monorepo. This project demo
 
 The goal of this project is to design and build a production-style platform on AWS using modern DevOps practices.
 
-The platform includes:
+The platform will include:
 
 - Containerized application
 - Infrastructure as Code with Terraform
@@ -30,9 +30,7 @@ The platform includes:
 ## 🏗️ High-Level Architecture
 
 ```text
-                    ┌──────────────┐
-                    │    Users     │
-                    └──────┬───────┘
+                         Users
                            │
                            ▼
                     ┌──────────────┐
@@ -44,12 +42,13 @@ The platform includes:
               ▼                         ▼
        ┌──────────────┐         ┌──────────────┐
        │   Frontend   │         │ Backend API  │
-       │ React + Nginx│         │ Node + Express│
+       │  (Planned)   │         │ Node + Express│
        └──────────────┘         └──────┬───────┘
                                       │
                                       ▼
                               ┌──────────────┐
                               │  PostgreSQL  │
+                              │  (Planned)   │
                               └──────────────┘
 
                          Amazon EKS
@@ -60,13 +59,8 @@ The platform includes:
       Helm                 ArgoCD              Observability
                                                     │
                                      Prometheus + Grafana + Loki
-
-
-
-
- 📁 Repository Structure
-
- production-aws-eks-platform/
+📁 Repository Structure
+production-aws-eks-platform/
 │
 ├── application/
 │   ├── backend/
@@ -96,9 +90,7 @@ The platform includes:
 ├── scripts/
 │
 └── README.md
-
 🧰 Technology Stack
-
 Application
 Node.js
 Express
@@ -137,10 +129,7 @@ CI/CD failure analysis
 Log analysis
 Incident root-cause analysis
 Cost optimization
-
-## 🚀 Project Roadmap
-
----
+🚀 Project Roadmap
 Phase 1 — Application
  Backend API foundation
  GET /health
@@ -201,29 +190,20 @@ Phase 9 — AI-Assisted DevOps
  Log analysis
  Incident investigation
  Cost and security recommendations
-
-## 🚀 Project Roadmap
-
----
-
 📊 Current Progress
 Completed
-Terraform infrastructure foundation
-AWS VPC created using Terraform
-Node.js backend application
-Express API
-Health endpoint
-Products API
-Product creation API
-Backend code refactoring
+ Terraform infrastructure foundation
+ AWS VPC created using Terraform
+ Node.js backend application
+ Express API
+ Health endpoint
+ Products API
+ Product creation API
+ Backend code refactoring
 Currently Working On
-PostgreSQL integration
-Docker Compose
-Frontend application
-
-
-***
-
+ PostgreSQL integration
+ Docker Compose
+ Frontend application
 📚 Documentation
 
 Detailed documentation will be added under:
@@ -279,11 +259,7 @@ Rakesh Gangwar
 DevOps Engineer focused on AWS, Terraform, Docker, Kubernetes, CI/CD, and cloud-native technologies.
 
 
-Save it with:
+After pasting and saving with **Ctrl + S**, run:
 
-```text
-Ctrl + S
-
-After saving, don't commit yet. First run:
-
+```bash
 git diff -- README.md
