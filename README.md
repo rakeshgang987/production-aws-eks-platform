@@ -59,7 +59,13 @@ The platform will include:
       Helm                 ArgoCD              Observability
                                                     │
                                      Prometheus + Grafana + Loki
-📁 Repository Structure
+```
+
+---
+
+## 📁 Repository Structure
+
+```text
 production-aws-eks-platform/
 │
 ├── application/
@@ -90,124 +96,173 @@ production-aws-eks-platform/
 ├── scripts/
 │
 └── README.md
-🧰 Technology Stack
-Application
-Node.js
-Express
-React
-PostgreSQL
-Containers
-Docker
-Docker Compose
-Cloud & Infrastructure
-AWS
-Terraform
-Amazon VPC
-Amazon EKS
-Amazon ECR
-Kubernetes
-Kubernetes
-Helm
-Ingress
-CI/CD & GitOps
-GitHub Actions
-ArgoCD
-Observability
-Prometheus
-Grafana
-Loki
-AI-Assisted DevOps
+```
+
+---
+
+## 🧰 Technology Stack
+
+### Application
+
+- Node.js
+- Express
+- React
+- PostgreSQL
+
+### Containers
+
+- Docker
+- Docker Compose
+
+### Cloud & Infrastructure
+
+- AWS
+- Terraform
+- Amazon VPC
+- Amazon EKS
+- Amazon ECR
+
+### Kubernetes
+
+- Kubernetes
+- Helm
+- Ingress
+
+### CI/CD & GitOps
+
+- GitHub Actions
+- ArgoCD
+
+### Observability
+
+- Prometheus
+- Grafana
+- Loki
+
+### AI-Assisted DevOps
 
 AI assistance will be integrated throughout the project for:
 
-Application code review
-Security analysis
-Dockerfile optimization
-Terraform code and plan review
-Kubernetes troubleshooting
-CI/CD failure analysis
-Log analysis
-Incident root-cause analysis
-Cost optimization
-🚀 Project Roadmap
-Phase 1 — Application
- Backend API foundation
- GET /health
- GET /api/products
- POST /api/products
- PostgreSQL integration
- Frontend application
-Phase 2 — Containerization
- Backend Dockerfile
- Frontend Dockerfile
- Docker Compose
- Local multi-container testing
- Container security review
-Phase 3 — AWS Infrastructure
- Terraform project structure
- AWS VPC
- Public and private subnets
- Route tables
- Internet Gateway
- NAT Gateway
- Security groups
- IAM
- Amazon EKS
-Phase 4 — Kubernetes
- Deployments
- Services
- ConfigMaps
- Secrets
- Resource requests and limits
- Health probes
- Ingress
-Phase 5 — Helm
- Helm chart
- Values files
- Environment-specific configuration
- Helm deployment testing
-Phase 6 — CI/CD
- GitHub Actions
- Automated testing
- Docker image build
- Image security scanning
- Push images to Amazon ECR
-Phase 7 — GitOps
- ArgoCD
- Automated synchronization
- Environment promotion
-Phase 8 — Observability
- Prometheus
- Grafana
- Loki
- Centralized logging
- Metrics and dashboards
- Alerting
-Phase 9 — AI-Assisted DevOps
- Terraform plan analysis
- Kubernetes troubleshooting workflow
- CI/CD failure analysis
- Log analysis
- Incident investigation
- Cost and security recommendations
-📊 Current Progress
-Completed
- Terraform infrastructure foundation
- AWS VPC created using Terraform
- Node.js backend application
- Express API
- Health endpoint
- Products API
- Product creation API
- Backend code refactoring
-Currently Working On
- PostgreSQL integration
- Docker Compose
- Frontend application
-📚 Documentation
+- Application code review
+- Security analysis
+- Dockerfile optimization
+- Terraform code and plan review
+- Kubernetes troubleshooting
+- CI/CD failure analysis
+- Log analysis
+- Incident root-cause analysis
+- Cost optimization
+
+---
+
+## 🚀 Project Roadmap
+
+### Phase 1 — Application
+
+- [x] Backend API foundation
+- [x] `GET /health`
+- [x] `GET /api/products`
+- [x] `POST /api/products`
+- [ ] PostgreSQL integration
+- [ ] Frontend application
+
+### Phase 2 — Containerization
+
+- [ ] Backend Dockerfile
+- [ ] Frontend Dockerfile
+- [ ] Docker Compose
+- [ ] Local multi-container testing
+- [ ] Container security review
+
+### Phase 3 — AWS Infrastructure
+
+- [x] Terraform project structure
+- [x] AWS VPC
+- [ ] Public and private subnets
+- [ ] Route tables
+- [ ] Internet Gateway
+- [ ] NAT Gateway
+- [ ] Security groups
+- [ ] IAM
+- [ ] Amazon EKS
+
+### Phase 4 — Kubernetes
+
+- [ ] Deployments
+- [ ] Services
+- [ ] ConfigMaps
+- [ ] Secrets
+- [ ] Resource requests and limits
+- [ ] Health probes
+- [ ] Ingress
+
+### Phase 5 — Helm
+
+- [ ] Helm chart
+- [ ] Values files
+- [ ] Environment-specific configuration
+- [ ] Helm deployment testing
+
+### Phase 6 — CI/CD
+
+- [ ] GitHub Actions
+- [ ] Automated testing
+- [ ] Docker image build
+- [ ] Image security scanning
+- [ ] Push images to Amazon ECR
+
+### Phase 7 — GitOps
+
+- [ ] ArgoCD
+- [ ] Automated synchronization
+- [ ] Environment promotion
+
+### Phase 8 — Observability
+
+- [ ] Prometheus
+- [ ] Grafana
+- [ ] Loki
+- [ ] Centralized logging
+- [ ] Metrics and dashboards
+- [ ] Alerting
+
+### Phase 9 — AI-Assisted DevOps
+
+- [ ] Terraform plan analysis
+- [ ] Kubernetes troubleshooting workflow
+- [ ] CI/CD failure analysis
+- [ ] Log analysis
+- [ ] Incident investigation
+- [ ] Cost and security recommendations
+
+---
+
+## 📊 Current Progress
+
+### Completed
+
+- [x] Terraform infrastructure foundation
+- [x] AWS VPC created using Terraform
+- [x] Node.js backend application
+- [x] Express API
+- [x] Health endpoint
+- [x] Products API
+- [x] Product creation API
+- [x] Backend code refactoring
+
+### Currently Working On
+
+- [ ] PostgreSQL integration
+- [ ] Docker Compose
+- [ ] Frontend application
+
+---
+
+## 📚 Documentation
 
 Detailed documentation will be added under:
 
+```text
 docs/
 ├── architecture/
 ├── application/
@@ -217,22 +272,27 @@ docs/
 ├── troubleshooting/
 ├── observability/
 └── ai-assisted-devops/
+```
 
 Every major milestone will include:
 
-What was built
-Why it was built
-How it works
-Problems encountered
-Troubleshooting steps
-AI-assisted analysis
-Lessons learned
-🎯 Project Philosophy
+- What was built
+- Why it was built
+- How it works
+- Problems encountered
+- Troubleshooting steps
+- AI-assisted analysis
+- Lessons learned
+
+---
+
+## 🎯 Project Philosophy
 
 This project focuses on understanding the complete DevOps lifecycle rather than simply using individual tools.
 
 The goal is to understand:
 
+```text
 Application
     ↓
 Containerization
@@ -252,14 +312,12 @@ Observability
 Incident Response
     ↓
 AI-Assisted DevOps
-👨‍💻 Author
+```
 
-Rakesh Gangwar
+---
+
+## 👨‍💻 Author
+
+**Rakesh Gangwar**
 
 DevOps Engineer focused on AWS, Terraform, Docker, Kubernetes, CI/CD, and cloud-native technologies.
-
-
-After pasting and saving with **Ctrl + S**, run:
-
-```bash
-git diff -- README.md
