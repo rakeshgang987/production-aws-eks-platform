@@ -12,3 +12,9 @@ tfplan
 # Crash logs
 crash.log
 crash.*.log
+
+# Node dependencies
+node_modules/
+
+# Environment variables
+.env
