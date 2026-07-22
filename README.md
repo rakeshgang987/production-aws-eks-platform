@@ -2,6 +2,8 @@
 
 A production-style DevOps platform built as a single monorepo. This project demonstrates the complete lifecycle of a containerized application—from application development and infrastructure provisioning to Kubernetes deployment, GitOps, observability, security, and AI-assisted DevOps operations.
 
+The project is being built incrementally. Each major milestone is implemented, tested, troubleshot, and documented before moving to the next stage.
+
 ---
 
 ## 🎯 Project Objective
@@ -10,24 +12,27 @@ The goal of this project is to design and build a production-style platform on A
 
 The platform will include:
 
-- Containerized application
-- Infrastructure as Code with Terraform
-- AWS VPC networking
-- Amazon EKS
-- Kubernetes
-- Helm
-- GitHub Actions CI/CD
-- Amazon ECR
-- ArgoCD GitOps
-- Prometheus
-- Grafana
-- Loki
-- AI-assisted DevOps workflows
-- Security and troubleshooting documentation
+* Containerized application
+* Docker Compose-based local development environment
+* Infrastructure as Code with Terraform
+* AWS VPC networking
+* Amazon EKS
+* Kubernetes
+* Helm
+* GitHub Actions CI/CD
+* Amazon ECR
+* ArgoCD GitOps
+* Prometheus
+* Grafana
+* Loki
+* AI-assisted DevOps workflows
+* Security and troubleshooting documentation
 
 ---
 
 ## 🏗️ High-Level Architecture
+
+The following represents the target production architecture. The application is currently running locally using Docker Compose and will later be deployed to Amazon EKS.
 
 ```text
                          Users
@@ -42,7 +47,7 @@ The platform will include:
               ▼                         ▼
        ┌──────────────┐         ┌──────────────┐
        │   Frontend   │         │ Backend API  │
-       │    React     │         │ Node + Express│
+       │ React + Nginx│         │ Node + Express│
        └──────────────┘         └──────┬───────┘
                                       │
                                       ▼
@@ -69,6 +74,8 @@ production-aws-eks-platform/
 │
 ├── application/
 │   ├── backend/
+│   │   ├── Dockerfile
+│   │   ├── .env.example
 │   │   ├── src/
 │   │   │   ├── server.js
 │   │   │   ├── app.js
@@ -79,17 +86,22 @@ production-aws-eks-platform/
 │   │   └── package-lock.json
 │   │
 │   ├── frontend/
+│   │   ├── Dockerfile
 │   │   ├── src/
 │   │   ├── package.json
 │   │   └── package-lock.json
 │   │
-│   └── docker-compose.yml
+│   ├── docker-compose.yml
+│   └── .dockerignore
 │
 ├── terraform/
 │   ├── environments/
 │   │   └── dev/
 │   │
 │   └── modules/
+│       ├── ecr/
+│       ├── eks/
+│       ├── iam/
 │       └── vpc/
 │
 ├── kubernetes/
@@ -98,15 +110,10 @@ production-aws-eks-platform/
 │
 ├── docs/
 │   ├── architecture/
-│   ├── application/
-│   │   ├── application-overview.md
-│   │   └── troubleshooting-cors.md
-│   ├── infrastructure/
-│   ├── kubernetes/
-│   ├── security/
-│   ├── troubleshooting/
-│   ├── observability/
-│   └── ai-assisted-devops/
+│   │   └── architecture.md
+│   ├── docker/
+│   │   └── docker.md
+│   └── requirements.md
 │
 ├── scripts/
 │
@@ -119,55 +126,58 @@ production-aws-eks-platform/
 
 ### Application
 
-- Node.js
-- Express
-- React
-- Vite
-- PostgreSQL
+* Node.js
+* Express
+* React
+* Vite
+* PostgreSQL
 
 ### Containers
 
-- Docker
-- Docker Compose
+* Docker
+* Docker Compose
+* Nginx
 
 ### Cloud & Infrastructure
 
-- AWS
-- Terraform
-- Amazon VPC
-- Amazon EKS
-- Amazon ECR
+* AWS
+* Terraform
+* Amazon VPC
+* Amazon EKS
+* Amazon ECR
 
 ### Kubernetes
 
-- Kubernetes
-- Helm
-- Ingress
+* Kubernetes
+* Helm
+* Ingress
 
 ### CI/CD & GitOps
 
-- GitHub Actions
-- ArgoCD
+* GitHub Actions
+* ArgoCD
 
 ### Observability
 
-- Prometheus
-- Grafana
-- Loki
+* Prometheus
+* Grafana
+* Loki
 
 ### AI-Assisted DevOps
 
 AI assistance will be integrated throughout the project for:
 
-- Application code review
-- Security analysis
-- Dockerfile optimization
-- Terraform code and plan review
-- Kubernetes troubleshooting
-- CI/CD failure analysis
-- Log analysis
-- Incident root-cause analysis
-- Cost optimization
+* Application code review
+* Security analysis
+* Dockerfile optimization
+* Terraform code and plan review
+* Kubernetes troubleshooting
+* CI/CD failure analysis
+* Log analysis
+* Incident root-cause analysis
+* Cost optimization
+
+AI will support engineering workflows while maintaining human understanding and verification of infrastructure decisions.
 
 ---
 
@@ -175,85 +185,90 @@ AI assistance will be integrated throughout the project for:
 
 ### Phase 1 — Application ✅
 
-- [x] Backend API foundation
-- [x] `GET /health`
-- [x] `GET /api/products`
-- [x] `POST /api/products`
-- [x] PostgreSQL integration
-- [x] Frontend application
-- [x] Frontend-to-backend communication
-- [x] CORS configuration
-- [x] Application documentation
+* [x] Backend API foundation
+* [x] `GET /health`
+* [x] `GET /api/products`
+* [x] `POST /api/products`
+* [x] PostgreSQL integration
+* [x] Frontend application
+* [x] Frontend-to-backend communication
+* [x] CORS configuration
+* [x] Application documentation
 
-### Phase 2 — Containerization 🚧
+### Phase 2 — Containerization ✅
 
-- [ ] Backend Dockerfile
-- [ ] Frontend Dockerfile
-- [ ] PostgreSQL container
-- [ ] Docker Compose
-- [ ] Local multi-container testing
-- [ ] Container security review
+* [x] Backend Dockerfile
+* [x] Frontend Dockerfile
+* [x] PostgreSQL container
+* [x] Docker Compose
+* [x] Local multi-container testing
+* [x] Container networking
+* [x] Persistent PostgreSQL storage
+* [x] Docker troubleshooting
+* [x] Docker documentation
+* [ ] Container security review
 
-### Phase 3 — AWS Infrastructure
+### Phase 3 — AWS Infrastructure 🚧
 
-- [x] Terraform project structure
-- [x] AWS VPC
-- [ ] Public and private subnets
-- [ ] Route tables
-- [ ] Internet Gateway
-- [ ] NAT Gateway
-- [ ] Security groups
-- [ ] IAM
-- [ ] Amazon EKS
+* [x] Terraform project structure
+* [x] AWS VPC foundation
+* [ ] Public and private subnets
+* [ ] Route tables
+* [ ] Internet Gateway
+* [ ] NAT Gateway
+* [ ] Security groups
+* [ ] IAM
+* [ ] Amazon ECR
+* [ ] Amazon EKS
 
 ### Phase 4 — Kubernetes
 
-- [ ] Deployments
-- [ ] Services
-- [ ] ConfigMaps
-- [ ] Secrets
-- [ ] Resource requests and limits
-- [ ] Health probes
-- [ ] Ingress
+* [ ] Deployments
+* [ ] Services
+* [ ] ConfigMaps
+* [ ] Secrets
+* [ ] Resource requests and limits
+* [ ] Health probes
+* [ ] Ingress
 
 ### Phase 5 — Helm
 
-- [ ] Helm chart
-- [ ] Values files
-- [ ] Environment-specific configuration
-- [ ] Helm deployment testing
+* [ ] Helm chart
+* [ ] Values files
+* [ ] Environment-specific configuration
+* [ ] Helm deployment testing
 
 ### Phase 6 — CI/CD
 
-- [ ] GitHub Actions
-- [ ] Automated testing
-- [ ] Docker image build
-- [ ] Image security scanning
-- [ ] Push images to Amazon ECR
+* [ ] GitHub Actions
+* [ ] Automated testing
+* [ ] Docker image build
+* [ ] Image security scanning
+* [ ] Push images to Amazon ECR
 
 ### Phase 7 — GitOps
 
-- [ ] ArgoCD
-- [ ] Automated synchronization
-- [ ] Environment promotion
+* [ ] ArgoCD
+* [ ] Automated synchronization
+* [ ] Environment promotion
 
 ### Phase 8 — Observability
 
-- [ ] Prometheus
-- [ ] Grafana
-- [ ] Loki
-- [ ] Centralized logging
-- [ ] Metrics and dashboards
-- [ ] Alerting
+* [ ] Prometheus
+* [ ] Grafana
+* [ ] Loki
+* [ ] Centralized logging
+* [ ] Metrics and dashboards
+* [ ] Alerting
 
 ### Phase 9 — AI-Assisted DevOps
 
-- [ ] Terraform plan analysis
-- [ ] Kubernetes troubleshooting workflow
-- [ ] CI/CD failure analysis
-- [ ] Log analysis
-- [ ] Incident investigation
-- [ ] Cost and security recommendations
+* [ ] Terraform plan analysis
+* [ ] Kubernetes troubleshooting workflow
+* [ ] CI/CD failure analysis
+* [ ] Log analysis
+* [ ] Incident investigation
+* [ ] Cost and security recommendations
 
 ---
 
@@ -261,56 +276,81 @@ AI assistance will be integrated throughout the project for:
 
 ### Completed
 
-- [x] Terraform infrastructure foundation
-- [x] AWS VPC created using Terraform
-- [x] Node.js backend application
-- [x] Express API
-- [x] Health endpoint
-- [x] Products API
-- [x] Product creation API
-- [x] PostgreSQL database integration
-- [x] React frontend application
-- [x] Frontend-to-backend API communication
-- [x] CORS configuration
-- [x] Application documentation
+#### Application
+
+* [x] Terraform infrastructure foundation
+* [x] AWS VPC foundation
+* [x] Node.js backend application
+* [x] Express API
+* [x] Health endpoint
+* [x] Products API
+* [x] Product creation API
+* [x] PostgreSQL database integration
+* [x] React frontend application
+* [x] Frontend-to-backend API communication
+* [x] CORS configuration
+* [x] Application documentation
+
+#### Containerization
+
+* [x] Backend Dockerfile
+* [x] Frontend Dockerfile
+* [x] PostgreSQL container
+* [x] Docker Compose orchestration
+* [x] Local multi-container testing
+* [x] Docker container networking
+* [x] Persistent PostgreSQL storage
+* [x] Docker troubleshooting and port conflict resolution
+* [x] Docker documentation
+
+---
 
 ### Currently Working On
 
-- [ ] Backend Dockerfile
-- [ ] Frontend Dockerfile
-- [ ] Docker Compose
-- [ ] Local multi-container testing
-- [ ] Container security review
+* [ ] Complete Terraform VPC implementation
+* [ ] Public and private subnet design
+* [ ] Route tables
+* [ ] Internet Gateway
+* [ ] NAT Gateway
+* [ ] Security groups
+* [ ] IAM configuration
+* [ ] Amazon ECR
+* [ ] Amazon EKS
 
 ---
 
 ## 📚 Documentation
 
-Detailed documentation will be added under:
+Detailed documentation is maintained under the `docs/` directory.
 
-```text
-docs/
-├── architecture/
-├── application/
-│   ├── application-overview.md
-│   └── troubleshooting-cors.md
-├── infrastructure/
-├── kubernetes/
-├── security/
-├── troubleshooting/
-├── observability/
-└── ai-assisted-devops/
-```
+### Architecture
+
+* [Architecture Overview](docs/architecture/architecture.md)
+
+### Docker
+
+* [Docker Containerization](docs/docker/docker.md)
+
+### Application
+
+Application documentation currently includes:
+
+* `application/application-overview.md`
+* `application/troubleshooting-cors.md`
+
+### Requirements
+
+* [Project Requirements](docs/requirements.md)
 
 Every major milestone will include:
 
-- What was built
-- Why it was built
-- How it works
-- Problems encountered
-- Troubleshooting steps
-- AI-assisted analysis
-- Lessons learned
+* What was built
+* Why it was built
+* How it works
+* Problems encountered
+* Troubleshooting steps
+* AI-assisted analysis
+* Lessons learned
 
 ---
 
@@ -342,6 +382,24 @@ Incident Response
 AI-Assisted DevOps
 ```
 
+Each milestone follows this workflow:
+
+```text
+Design
+    ↓
+Implement
+    ↓
+Test
+    ↓
+Troubleshoot
+    ↓
+Document
+    ↓
+Commit
+```
+
+The objective is to build a production-style platform while understanding the engineering decisions, trade-offs, failures, and troubleshooting involved at every stage.
+
 ---
 
 ## 👨‍💻 Author
@@ -349,3 +407,13 @@ AI-Assisted DevOps
 **Rakesh Gangwar**
 
 DevOps Engineer focused on AWS, Terraform, Docker, Kubernetes, CI/CD, and cloud-native technologies.
+
+---
+
+## 🚧 Project Status
+
+**Active Development**
+
+Application development and Docker containerization are complete.
+
+The next milestone is completing the Terraform-managed AWS infrastructure.
