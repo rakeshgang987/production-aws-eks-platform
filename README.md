@@ -65,6 +65,28 @@ The following represents the target production architecture. The application is 
                                      Prometheus + Grafana + Loki
 ```
 
+### Current Local Architecture
+
+```text
+┌─────────────────────────────────────────────────────┐
+│              Docker Compose Environment             │
+│                                                     │
+│  ┌──────────────┐      ┌──────────────┐             │
+│  │   Frontend   │─────▶│ Backend API  │             │
+│  │ React + Nginx│      │ Node + Express│            │
+│  │    :5173     │      │    :3000     │             │
+│  └──────────────┘      └──────┬───────┘             │
+│                               │                     │
+│                               ▼                     │
+│                       ┌──────────────┐              │
+│                       │  PostgreSQL  │              │
+│                       │    :5432     │              │
+│                       └──────────────┘              │
+│                                                     │
+│       Docker Network + Persistent Volume            │
+└─────────────────────────────────────────────────────┘
+```
+
 ---
 
 ## 📁 Repository Structure
@@ -87,6 +109,7 @@ production-aws-eks-platform/
 │   │
 │   ├── frontend/
 │   │   ├── Dockerfile
+│   │   ├── nginx.conf
 │   │   ├── src/
 │   │   ├── package.json
 │   │   └── package-lock.json
@@ -137,6 +160,7 @@ production-aws-eks-platform/
 * Docker
 * Docker Compose
 * Nginx
+* Alpine Linux-based container images
 
 ### Cloud & Infrastructure
 
@@ -165,19 +189,20 @@ production-aws-eks-platform/
 
 ### AI-Assisted DevOps
 
-AI assistance will be integrated throughout the project for:
+AI assistance is integrated into the engineering workflow to support:
 
 * Application code review
-* Security analysis
-* Dockerfile optimization
-* Terraform code and plan review
+* Dockerfile analysis and optimization
+* Container security review
+* Terraform code review
+* Terraform plan analysis
 * Kubernetes troubleshooting
 * CI/CD failure analysis
 * Log analysis
 * Incident root-cause analysis
 * Cost optimization
 
-AI will support engineering workflows while maintaining human understanding and verification of infrastructure decisions.
+AI is used as an engineering assistant. Infrastructure changes are reviewed, tested, and verified by the engineer before being applied.
 
 ---
 
@@ -199,25 +224,32 @@ AI will support engineering workflows while maintaining human understanding and 
 
 * [x] Backend Dockerfile
 * [x] Frontend Dockerfile
+* [x] Multi-stage frontend Docker build
+* [x] Nginx-based frontend runtime
+* [x] Non-root container execution
 * [x] PostgreSQL container
-* [x] Docker Compose
+* [x] Docker Compose orchestration
 * [x] Local multi-container testing
 * [x] Container networking
 * [x] Persistent PostgreSQL storage
+* [x] Container health checks
 * [x] Docker troubleshooting
 * [x] Docker documentation
-* [ ] Container security review
+* [ ] Final container security review
 
 ### Phase 3 — AWS Infrastructure 🚧
 
 * [x] Terraform project structure
+* [x] Terraform VPC module
 * [x] AWS VPC foundation
-* [ ] Public and private subnets
+* [x] Terraform variables and outputs
+* [x] Terraform validation and planning
+* [ ] Public and private subnet design
 * [ ] Route tables
 * [ ] Internet Gateway
 * [ ] NAT Gateway
 * [ ] Security groups
-* [ ] IAM
+* [ ] IAM configuration
 * [ ] Amazon ECR
 * [ ] Amazon EKS
 
@@ -278,8 +310,6 @@ AI will support engineering workflows while maintaining human understanding and 
 
 #### Application
 
-* [x] Terraform infrastructure foundation
-* [x] AWS VPC foundation
 * [x] Node.js backend application
 * [x] Express API
 * [x] Health endpoint
@@ -294,24 +324,41 @@ AI will support engineering workflows while maintaining human understanding and 
 #### Containerization
 
 * [x] Backend Dockerfile
-* [x] Frontend Dockerfile
+* [x] Frontend multi-stage Dockerfile
+* [x] Nginx frontend runtime
+* [x] Non-root container execution
 * [x] PostgreSQL container
 * [x] Docker Compose orchestration
-* [x] Local multi-container testing
 * [x] Docker container networking
 * [x] Persistent PostgreSQL storage
+* [x] Container health checks
 * [x] Docker troubleshooting and port conflict resolution
 * [x] Docker documentation
+
+#### Terraform Foundation
+
+* [x] Terraform environment structure
+* [x] Reusable VPC module
+* [x] Terraform variables
+* [x] Terraform outputs
+* [x] AWS provider configuration
+* [x] Terraform validation
+* [x] Terraform plan
+* [x] AWS VPC foundation
 
 ---
 
 ### Currently Working On
 
-* [ ] Complete Terraform VPC implementation
-* [ ] Public and private subnet design
-* [ ] Route tables
+The next major milestone is completing the Terraform-managed AWS networking infrastructure.
+
+Planned work:
+
+* [ ] Public subnet design
+* [ ] Private subnet design
 * [ ] Internet Gateway
 * [ ] NAT Gateway
+* [ ] Route tables
 * [ ] Security groups
 * [ ] IAM configuration
 * [ ] Amazon ECR
@@ -342,7 +389,7 @@ Application documentation currently includes:
 
 * [Project Requirements](docs/requirements.md)
 
-Every major milestone will include:
+Every major milestone includes:
 
 * What was built
 * Why it was built
@@ -351,6 +398,64 @@ Every major milestone will include:
 * Troubleshooting steps
 * AI-assisted analysis
 * Lessons learned
+
+---
+
+## 🤖 AI-Assisted DevOps Workflow
+
+AI is used throughout the project as a technical assistant rather than as a replacement for engineering understanding.
+
+The workflow follows:
+
+```text
+Engineer
+    │
+    ▼
+Define Problem
+    │
+    ▼
+AI-Assisted Analysis
+    │
+    ▼
+Review Suggestions
+    │
+    ▼
+Implement Changes
+    │
+    ▼
+Test and Validate
+    │
+    ▼
+Document Lessons Learned
+```
+
+Examples include:
+
+```text
+Dockerfile
+    ↓
+AI Review
+    ↓
+Security and Optimization Analysis
+    ↓
+Engineer Verification
+    ↓
+Build and Test
+```
+
+```text
+Terraform Plan
+    ↓
+AI-Assisted Review
+    ↓
+Potential Risk Identification
+    ↓
+Engineer Verification
+    ↓
+Apply Infrastructure
+```
+
+The goal is to demonstrate practical AI-assisted DevOps workflows while maintaining human ownership of technical decisions.
 
 ---
 
@@ -393,6 +498,8 @@ Test
     ↓
 Troubleshoot
     ↓
+Use AI-Assisted Analysis
+    ↓
 Document
     ↓
 Commit
@@ -416,4 +523,6 @@ DevOps Engineer focused on AWS, Terraform, Docker, Kubernetes, CI/CD, and cloud-
 
 Application development and Docker containerization are complete.
 
-The next milestone is completing the Terraform-managed AWS infrastructure.
+The Terraform infrastructure foundation is complete, including the reusable VPC module and AWS VPC foundation.
+
+The next milestone is to expand the VPC into a complete AWS networking layer with subnets, routing, NAT, security groups, and IAM before proceeding toward Amazon ECR and Amazon EKS.

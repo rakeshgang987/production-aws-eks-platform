@@ -1,93 +1,93 @@
 # Docker Containerization
 
-## 1. Overview
+## Objective
 
-The Production AWS EKS Platform application is containerized using Docker.
+The application was containerized to create a reproducible local environment for the complete application stack.
 
-The application consists of three primary services:
+The Docker setup includes:
 
-```text
-┌────────────────────────────────────┐
-│          Docker Compose            │
-│                                    │
-│  ┌──────────────┐                  │
-│  │   Frontend   │                  │
-│  │ React + Nginx│                  │
-│  │   Port 5173  │                  │
-│  └──────┬───────┘                  │
-│         │                          │
-│         ▼                          │
-│  ┌──────────────┐                  │
-│  │    Backend   │                  │
-│  │ Node.js +    │                  │
-│  │    Express   │                  │
-│  │   Port 3000  │                  │
-│  └──────┬───────┘                  │
-│         │                          │
-│         ▼                          │
-│  ┌──────────────┐                  │
-│  │  PostgreSQL  │                  │
-│  │   Database   │                  │
-│  │   Port 5432  │                  │
-│  └──────────────┘                  │
-│                                    │
-└────────────────────────────────────┘
-```
+* React frontend
+* Node.js and Express backend API
+* PostgreSQL database
+* Docker Compose orchestration
+* Multi-stage frontend image build
+* Non-root container execution
+* Container health checks
+* Persistent PostgreSQL storage
 
-The containerized application flow is:
-
-```text
-User Browser
-     │
-     ▼
-Frontend Container
-     │
-     ▼
-Backend API Container
-     │
-     ▼
-PostgreSQL Container
-```
+The objective was not only to make the application run inside containers, but also to apply production-oriented containerization practices that can later be used as the foundation for Kubernetes and Amazon EKS deployment.
 
 ---
 
-## 2. Docker Components
-
-The application uses the following containerized components:
-
-| Component | Technology        | Container Port | Host Port |
-| --------- | ----------------- | -------------: | --------: |
-| Frontend  | React + Nginx     |             80 |      5173 |
-| Backend   | Node.js + Express |           3000 |      3000 |
-| Database  | PostgreSQL 16     |           5432 |      5432 |
-
----
-
-## 3. Project Docker Structure
+## Application Architecture
 
 ```text
-application/
-├── backend/
-│   ├── Dockerfile
-│   ├── package.json
-│   ├── package-lock.json
-│   └── src/
-│
-├── frontend/
-│   ├── Dockerfile
-│   ├── package.json
-│   ├── package-lock.json
-│   └── src/
-│
-├── docker-compose.yml
-└── .dockerignore
+                    User
+                      │
+                      ▼
+              localhost:5173
+                      │
+                      ▼
+        ┌─────────────────────────┐
+        │   Frontend Container    │
+        │   React + Vite + Nginx  │
+        │       Port: 8080        │
+        └────────────┬────────────┘
+                     │
+                     ▼
+              localhost:3000
+                     │
+                     ▼
+        ┌─────────────────────────┐
+        │   Backend Container     │
+        │   Node.js + Express     │
+        │       Port: 3000        │
+        └────────────┬────────────┘
+                     │
+                     ▼
+        ┌─────────────────────────┐
+        │  PostgreSQL Container   │
+        │       Port: 5432        │
+        └─────────────────────────┘
 ```
+
+Docker Compose creates an internal network where containers communicate using service names.
+
+For example:
+
+```text
+backend → postgres:5432
+```
+
+The backend does not connect to the database using `localhost`.
+
+Inside a container:
+
+```text
+localhost = the current container
+```
+
+Therefore, the backend connects to PostgreSQL using:
+
+```text
+DB_HOST=postgres
+```
+
+The hostname `postgres` is automatically resolved by Docker Compose.
 
 ---
 
-## 4. Backend Dockerfile
+# 1. Backend Containerization
 
-The backend is containerized using the following Dockerfile:
+## Dockerfile
+
+Location:
+
+```text
+application/backend/Dockerfile
+```
+
+Current Dockerfile:
 
 ```dockerfile
 FROM node:20-alpine
@@ -102,39 +102,60 @@ COPY backend/ .
 
 EXPOSE 3000
 
+USER node
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
 CMD ["node", "src/server.js"]
 ```
 
-### 4.1 Base Image
+---
+
+## Base Image
 
 ```dockerfile
 FROM node:20-alpine
 ```
 
-The backend uses Node.js 20 running on Alpine Linux.
+The application uses the official Node.js 20 Alpine image.
 
-The Alpine image is lightweight and helps reduce:
+### Why Alpine?
 
-* Image size
-* Download time
-* Deployment time
-* Unnecessary packages
+Alpine Linux is a lightweight Linux distribution.
 
-### 4.2 Working Directory
+Advantages include:
+
+* Smaller image size
+* Reduced attack surface
+* Faster image transfer
+* Lower storage requirements
+
+However, Alpine images can sometimes have compatibility issues with packages that depend on system libraries.
+
+For this application, the lightweight Alpine image works correctly.
+
+---
+
+## Working Directory
 
 ```dockerfile
 WORKDIR /app
 ```
 
-All subsequent commands run inside:
+This creates the working directory inside the container.
+
+All subsequent commands execute from:
 
 ```text
 /app
 ```
 
-inside the container.
+This provides a predictable application structure.
 
-### 4.3 Dependency Installation
+---
+
+## Dependency Installation
 
 ```dockerfile
 COPY backend/package*.json ./
@@ -146,43 +167,131 @@ The package files are copied before the application source code.
 
 This improves Docker layer caching.
 
-Production dependencies are installed using:
+If only application source code changes:
+
+```text
+package.json unchanged
+        ↓
+Dependency layer can be reused
+        ↓
+Faster rebuild
+```
+
+The command:
 
 ```bash
 npm ci --omit=dev
 ```
 
-Development dependencies are excluded from the production container.
+installs dependencies using the lock file and excludes development dependencies.
 
-### 4.4 Application Code
+This is appropriate for a production-style runtime image.
+
+---
+
+## Copying Application Code
 
 ```dockerfile
 COPY backend/ .
 ```
 
-The backend application source code is copied into the image.
+The backend source code is copied into the container.
 
-### 4.5 Exposed Port
+The resulting structure is approximately:
 
-```dockerfile
-EXPOSE 3000
+```text
+/app
+├── package.json
+├── package-lock.json
+├── src/
+│   ├── server.js
+│   ├── app.js
+│   ├── db.js
+│   └── routes/
+└── node_modules/
 ```
-
-The backend application listens on port `3000`.
-
-### 4.6 Container Startup
-
-```dockerfile
-CMD ["node", "src/server.js"]
-```
-
-This starts the backend API when the container starts.
 
 ---
 
-## 5. Frontend Dockerfile
+## Non-Root Execution
 
-The frontend uses a multi-stage Docker build:
+```dockerfile
+USER node
+```
+
+The container does not run the application as root.
+
+This is an important container security practice.
+
+If the application process is compromised, running as a non-root user limits the permissions available inside the container.
+
+The running user was verified using:
+
+```bash
+docker exec -it production-platform-backend whoami
+```
+
+Expected output:
+
+```text
+node
+```
+
+---
+
+## Health Check
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+```
+
+The health check verifies the backend health endpoint:
+
+```text
+GET /health
+```
+
+Example:
+
+```bash
+curl http://localhost:3000/health
+```
+
+Expected response:
+
+```json
+{
+  "status": "healthy",
+  "service": "backend-api"
+}
+```
+
+Docker uses the health check to determine whether the container is healthy.
+
+Example:
+
+```text
+Up (healthy)
+```
+
+This is more useful than checking only whether the process is running.
+
+A process can be running while the application itself is not responding correctly.
+
+---
+
+# 2. Frontend Containerization
+
+## Dockerfile
+
+Location:
+
+```text
+application/frontend/Dockerfile
+```
+
+The frontend uses a multi-stage Docker build.
 
 ```dockerfile
 FROM node:20-alpine AS build
@@ -202,18 +311,31 @@ FROM nginx:alpine
 
 COPY --from=build /app/dist /usr/share/nginx/html
 
+COPY frontend/nginx.conf /etc/nginx/nginx.conf
+
+RUN chown -R nginx:nginx /usr/share/nginx/html \
+    && chown -R nginx:nginx /var/cache/nginx \
+    && chown -R nginx:nginx /var/log/nginx \
+    && touch /var/run/nginx.pid \
+    && chown nginx:nginx /var/run/nginx.pid
+
+USER nginx
+
 EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080 || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
 ```
 
 ---
 
-## 6. Multi-Stage Docker Build
+## Multi-Stage Build
 
-The frontend Dockerfile contains two stages.
+The frontend uses two stages.
 
-### Stage 1: Build Stage
+### Stage 1: Build
 
 ```dockerfile
 FROM node:20-alpine AS build
@@ -221,315 +343,556 @@ FROM node:20-alpine AS build
 
 This stage:
 
-1. Installs Node.js
-2. Installs frontend dependencies
-3. Copies the source code
-4. Builds the React application
-
-The build command is:
+1. Installs Node.js dependencies
+2. Copies the React application
+3. Builds the production frontend
 
 ```bash
 npm run build
 ```
 
-This generates the production-ready frontend files inside:
+The output is generated in:
 
 ```text
-dist/
+/app/dist
 ```
 
-### Stage 2: Production Stage
+---
+
+### Stage 2: Runtime
 
 ```dockerfile
 FROM nginx:alpine
 ```
 
-The final image uses Nginx.
-
-The compiled frontend is copied:
+The final image contains Nginx and the compiled frontend files.
 
 ```dockerfile
 COPY --from=build /app/dist /usr/share/nginx/html
 ```
 
-Nginx then serves the static frontend application.
+The Node.js build environment is not included in the final runtime image.
 
-### Why Multi-Stage Builds?
+This provides:
 
-Without a multi-stage build, the final image may contain:
-
-* Node.js
-* npm
-* Source code
-* Build tools
-* Development dependencies
-
-With a multi-stage build:
-
-```text
-Build Stage
-    │
-    ├── Node.js
-    ├── npm
-    ├── Source Code
-    └── Dependencies
-            │
-            ▼
-       npm run build
-            │
-            ▼
-          dist/
-            │
-            ▼
-Production Stage
-    │
-    └── Nginx + Compiled Frontend
-```
-
-Benefits:
-
-* Smaller production image
-* Faster deployments
-* Fewer unnecessary packages
+* Smaller runtime image
 * Reduced attack surface
-* Better production architecture
+* No unnecessary build dependencies
+* Better separation between build and runtime
 
 ---
 
-## 7. PostgreSQL Container
+# 3. Nginx Configuration
 
-PostgreSQL is defined in `docker-compose.yml`:
+The frontend uses a custom Nginx configuration.
+
+The application listens on:
+
+```text
+8080
+```
+
+Example configuration:
+
+```nginx
+events {}
+
+http {
+    include /etc/nginx/mime.types;
+
+    server {
+        listen 8080;
+
+        server_name _;
+
+        root /usr/share/nginx/html;
+
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+    }
+}
+```
+
+The following configuration is important for React applications:
+
+```nginx
+try_files $uri $uri/ /index.html;
+```
+
+This allows client-side routing to work correctly.
+
+---
+
+# 4. Frontend Port Configuration
+
+The frontend container listens internally on:
+
+```text
+8080
+```
+
+Docker Compose maps the host port:
+
+```text
+5173 → 8080
+```
+
+Therefore:
+
+```text
+Host:
+http://localhost:5173
+
+Container:
+http://localhost:8080
+```
+
+The port mapping is:
+
+```yaml
+ports:
+  - "5173:8080"
+```
+
+This means:
+
+```text
+HOST_PORT:CONTAINER_PORT
+```
+
+---
+
+# 5. Docker Compose
+
+Location:
+
+```text
+application/docker-compose.yml
+```
+
+Docker Compose manages the complete local application stack.
+
+Services:
+
+```text
+PostgreSQL
+    ↓
+Backend API
+    ↓
+Frontend
+```
+
+The main services are:
+
+```yaml
+services:
+  postgres:
+  backend:
+  frontend:
+```
+
+---
+
+## PostgreSQL Service
 
 ```yaml
 postgres:
   image: postgres:16
   container_name: production-platform-postgres
   restart: unless-stopped
-
-  environment:
-    POSTGRES_DB: products_db
-    POSTGRES_USER: app_user
-    POSTGRES_PASSWORD: app_password
-
-  ports:
-    - "5432:5432"
-
-  volumes:
-    - postgres_data:/var/lib/postgresql/data
 ```
 
-### Database Configuration
+The PostgreSQL database uses the official PostgreSQL 16 image.
+
+Environment variables configure:
+
+```yaml
+POSTGRES_DB: products_db
+POSTGRES_USER: app_user
+POSTGRES_PASSWORD: app_password
+```
+
+The database is exposed locally through:
 
 ```text
-Database: products_db
-User: app_user
-Password: app_password
-Port: 5432
+5432:5432
 ```
 
-### Persistent Storage
+---
 
-The PostgreSQL data is stored in:
+## Persistent Storage
+
+```yaml
+volumes:
+  - postgres_data:/var/lib/postgresql/data
+```
+
+The named volume:
 
 ```text
 postgres_data
 ```
 
-and mounted inside the container at:
+persists PostgreSQL data.
+
+Without a volume, deleting the container could delete the database data.
+
+The volume provides:
 
 ```text
-/var/lib/postgresql/data
-```
-
-The volume ensures that database data survives container recreation.
-
-Without a volume:
-
-```text
-Container Deleted
-        │
-        ▼
-Database Data Lost
-```
-
-With a persistent volume:
-
-```text
-Container Deleted
-        │
-        ▼
-Database Data Preserved
+Container recreation
+        ↓
+Database data remains available
 ```
 
 ---
 
-## 8. Docker Compose
+## Backend Service
 
-Docker Compose is used to run the complete application stack.
+The backend is built using:
 
-The services are:
+```yaml
+build:
+  context: .
+  dockerfile: backend/Dockerfile
+```
+
+The Docker build context is:
 
 ```text
-Frontend
-    │
-    ▼
-Backend
-    │
-    ▼
-PostgreSQL
+application/
 ```
 
-The Compose configuration provides:
+This is important because the Dockerfile uses:
 
-* Service orchestration
-* Container networking
-* Environment variable configuration
-* Port mapping
-* Persistent storage
-* Service dependencies
-
-### Start the Application
-
-From the `application` directory:
-
-```bash
-docker compose up --build
+```dockerfile
+COPY backend/package*.json ./
+COPY backend/ .
 ```
 
-The `--build` option rebuilds images before starting the containers.
+The backend is exposed through:
 
-### Run in Detached Mode
-
-```bash
-docker compose up --build -d
+```text
+3000:3000
 ```
 
-### Check Running Containers
+Environment variables:
 
-```bash
-docker ps
+```yaml
+environment:
+  PORT: 3000
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_NAME: products_db
+  DB_USER: app_user
+  DB_PASSWORD: app_password
 ```
 
-### Stop the Application
-
-```bash
-docker compose down
-```
-
-### Stop Containers and Remove Volumes
-
-```bash
-docker compose down -v
-```
-
-⚠️ This removes the PostgreSQL volume and deletes the database data stored in it.
-
----
-
-## 9. Container Networking
-
-Docker Compose creates an internal network for the services.
-
-The backend connects to PostgreSQL using:
+The important point is:
 
 ```text
 DB_HOST=postgres
 ```
 
-The hostname `postgres` is the Compose service name.
-
-The backend database configuration is:
-
-```javascript
-const pool = new Pool({
-  host: process.env.DB_HOST || "localhost",
-  port: process.env.DB_PORT || 5432,
-  user: process.env.DB_USER || "app_user",
-  password: process.env.DB_PASSWORD || "app_password",
-  database: process.env.DB_NAME || "products_db",
-});
-```
-
-Inside Docker:
+not:
 
 ```text
-Backend Container
-       │
-       │ DB_HOST=postgres
-       ▼
-PostgreSQL Container
+DB_HOST=localhost
 ```
 
-The backend should not use `localhost` to reach PostgreSQL from inside its container.
-
-Inside a container:
-
-```text
-localhost = The Current Container
-```
-
-Therefore:
-
-```text
-Backend → localhost:5432
-```
-
-would incorrectly point to the backend container itself.
-
-Instead:
-
-```text
-Backend → postgres:5432
-```
-
-correctly reaches the PostgreSQL container through Docker's internal DNS.
+Docker Compose provides service discovery using the service name.
 
 ---
 
-## 10. Port Mapping
+## Frontend Service
 
-The application exposes the following ports:
+The frontend is built using:
+
+```yaml
+build:
+  context: .
+  dockerfile: frontend/Dockerfile
+```
+
+The port mapping is:
+
+```yaml
+ports:
+  - "5173:8080"
+```
+
+This means:
 
 ```text
-Frontend:
-Host 5173 → Container 80
+localhost:5173
+        ↓
+Frontend container port 8080
+```
+
+The frontend depends on the backend:
+
+```yaml
+depends_on:
+  - backend
+```
+
+---
+
+# 6. Docker Compose Startup
+
+The complete stack can be started using:
+
+```bash
+cd application
+docker compose up -d
+```
+
+Expected result:
+
+```text
+PostgreSQL started
+Backend started
+Frontend started
+```
+
+To verify running containers:
+
+```bash
+docker ps
+```
+
+Expected services:
+
+```text
+production-platform-postgres
+production-platform-backend
+production-platform-frontend
+```
+
+---
+
+# 7. Validation
+
+## Check Container Status
+
+```bash
+docker ps
+```
+
+Expected:
+
+```text
+production-platform-frontend   Up (healthy)
+production-platform-backend   Up (healthy)
+production-platform-postgres   Up
+```
+
+---
+
+## Test Backend Health
+
+```bash
+curl http://localhost:3000/health
+```
+
+Expected:
+
+```json
+{
+  "status": "healthy",
+  "service": "backend-api"
+}
+```
+
+---
+
+## Test Frontend
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+The React application should load through Nginx.
+
+---
+
+## Test Frontend from Inside the Container
+
+Because the Nginx configuration listens on port 8080:
+
+```bash
+docker exec production-platform-frontend \
+  wget -S -O - http://127.0.0.1:8080
+```
+
+Expected:
+
+```text
+HTTP/1.1 200 OK
+```
+
+---
+
+## Verify Backend User
+
+```bash
+docker exec -it production-platform-backend whoami
+```
+
+Expected:
+
+```text
+node
+```
+
+This confirms that the backend is not running as root.
+
+---
+
+# 8. Troubleshooting: Frontend Health Check
+
+During implementation, the frontend health check initially failed.
+
+The container was running, but Docker reported:
+
+```text
+(unhealthy)
+```
+
+The first problem was a port mismatch.
+
+The health check was checking:
+
+```text
+localhost:80
+```
+
+while the custom Nginx configuration was configured to listen on:
+
+```text
+8080
+```
+
+The health check was updated to:
+
+```dockerfile
+CMD wget --no-verbose --tries=1 --spider http://localhost:8080 || exit 1
+```
+
+However, the health check initially still failed when using:
+
+```text
+localhost
+```
+
+because the container resolved:
+
+```text
+localhost → ::1
+```
+
+The Nginx server was reachable through IPv4:
+
+```text
+127.0.0.1
+```
+
+Testing confirmed:
+
+```bash
+wget http://localhost:8080
+```
+
+failed.
+
+But:
+
+```bash
+wget http://127.0.0.1:8080
+```
+
+returned:
+
+```text
+HTTP/1.1 200 OK
+```
+
+Therefore, the final health check uses:
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:8080 || exit 1
+```
+
+This resulted in:
+
+```text
+production-platform-frontend   Up (healthy)
+```
+
+### Lesson Learned
+
+A container can be:
+
+```text
+Running
+```
+
+but still:
+
+```text
+Unhealthy
+```
+
+Health checks must verify the actual application endpoint.
+
+Port configuration and IPv4/IPv6 resolution can also affect health check results.
+
+---
+
+# 9. Docker Security Practices Implemented
+
+The following security practices were implemented:
+
+### Non-root execution
 
 Backend:
-Host 3000 → Container 3000
 
-PostgreSQL:
-Host 5432 → Container 5432
+```dockerfile
+USER node
 ```
 
-The architecture is:
+Frontend:
 
-```text
-Browser
-   │
-   ▼
-localhost:5173
-   │
-   ▼
-Frontend Container
-   │
-   ▼
-localhost:3000
-   │
-   ▼
-Backend Container
-   │
-   ▼
-postgres:5432
-   │
-   ▼
-PostgreSQL Container
+```dockerfile
+USER nginx
 ```
+
+Running containers as non-root users reduces the impact of a potential container compromise.
 
 ---
 
-## 11. `.dockerignore`
+### Minimal runtime images
 
-The project uses:
+The application uses:
+
+```text
+node:20-alpine
+nginx:alpine
+```
+
+The frontend uses a multi-stage build so that Node.js build dependencies are not included in the final Nginx runtime image.
+
+---
+
+### Build Context Filtering
+
+The `.dockerignore` file excludes unnecessary files:
 
 ```text
 node_modules
@@ -542,164 +905,239 @@ docker-compose.yml
 README.md
 ```
 
-The `.dockerignore` file prevents unnecessary files from being sent to the Docker build context.
+This prevents unnecessary files from being sent to the Docker build context.
 
-This helps:
+It also prevents local secrets such as:
 
-* Reduce build context size
-* Improve build speed
-* Avoid copying local dependencies
-* Prevent accidental inclusion of sensitive files
+```text
+.env
+```
+
+from accidentally being included in the image build context.
 
 ---
 
-## 12. Docker Troubleshooting: Port Conflict
+# 10. AI-Assisted DevOps Analysis
 
-During the Docker deployment, the backend initially failed to start because port `3000` was already in use.
+AI was used as an engineering assistant during the Docker implementation and troubleshooting process.
 
-The error was:
-
-```text
-failed to bind port 0.0.0.0:3000
-address already in use
-```
-
-To identify the process using port `3000`:
-
-```bash
-sudo lsof -i :3000
-```
-
-The output showed a Node.js process listening on the port:
+The AI-assisted workflow included:
 
 ```text
-node 80471 ... TCP *:3000 (LISTEN)
+Dockerfile Design
+        ↓
+Security Review
+        ↓
+Container Testing
+        ↓
+Health Check Analysis
+        ↓
+Troubleshooting
+        ↓
+Configuration Improvement
+        ↓
+Validation
 ```
 
-The process was stopped:
+Examples of AI-assisted DevOps work included:
 
-```bash
-kill 80471
-```
+* Reviewing Dockerfile structure
+* Evaluating base image choices
+* Explaining multi-stage builds
+* Reviewing non-root container execution
+* Identifying health check problems
+* Analyzing port mismatches
+* Troubleshooting Nginx configuration
+* Explaining Docker Compose networking
+* Reviewing container security practices
+* Explaining why `localhost` behaves differently inside containers
+* Analyzing container status and logs
 
-After the port was released, Docker Compose successfully started the backend container.
+AI was not used as a replacement for validation.
 
-### General Troubleshooting Process
+The workflow was:
 
 ```text
-Application Fails to Start
-          │
-          ▼
-Check Error Message
-          │
-          ▼
-Check Port Usage
-          │
-          ▼
-sudo lsof -i :3000
-          │
-          ▼
-Identify Conflicting Process
-          │
-          ▼
-Stop or Reconfigure Process
-          │
-          ▼
-Restart Docker Compose
+AI suggestion
+      ↓
+Engineer implementation
+      ↓
+Docker command execution
+      ↓
+Logs and output analysis
+      ↓
+Configuration correction
+      ↓
+Final validation
+```
+
+This is the practical model of AI-assisted DevOps used in this project.
+
+---
+
+# 11. Important Lessons Learned
+
+### 1. Container running does not mean application healthy
+
+A process can be running while the application endpoint is unavailable.
+
+Therefore:
+
+```text
+Process status ≠ Application health
+```
+
+Health checks are important.
+
+---
+
+### 2. Container networking is different from host networking
+
+Inside the backend container:
+
+```text
+localhost
+```
+
+means:
+
+```text
+backend container
+```
+
+It does not mean:
+
+```text
+PostgreSQL container
+```
+
+Therefore, Docker Compose service names must be used:
+
+```text
+postgres
 ```
 
 ---
 
-## 13. Verification
+### 3. Docker Compose provides service discovery
 
-After starting the application:
-
-```bash
-docker compose up --build
-```
-
-Verify running containers:
-
-```bash
-docker ps
-```
-
-Expected containers:
+The backend can connect to PostgreSQL using:
 
 ```text
-production-platform-frontend
-production-platform-backend
-production-platform-postgres
+postgres:5432
 ```
 
-### Verify Backend API
-
-```bash
-curl http://localhost:3000/api/products
-```
-
-### Verify Frontend
-
-Open:
-
-```text
-http://localhost:5173
-```
-
-The complete application should be accessible through the frontend.
+because Docker Compose creates an internal network and resolves the service name.
 
 ---
 
-## 14. Docker Milestone Result
+### 4. Multi-stage builds reduce runtime image size
 
-The application has successfully been containerized into independent services:
+The frontend needs Node.js to build the application.
+
+The final application only needs Nginx to serve the static files.
+
+Therefore:
 
 ```text
-┌──────────────────┐
-│     Frontend     │
-│   React + Nginx  │
-│    Port 5173     │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│     Backend      │
-│ Node.js + Express│
-│    Port 3000     │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│    PostgreSQL    │
-│     Database     │
-│    Port 5432     │
-└──────────────────┘
+Node.js build environment
+        ↓
+Compiled React files
+        ↓
+Nginx runtime image
 ```
 
-### Completed Docker Objectives
+---
 
-* Containerized the backend application
-* Containerized the frontend application
-* Used a multi-stage frontend Docker build
-* Added PostgreSQL as a containerized database
-* Configured Docker Compose orchestration
-* Configured container-to-container networking
-* Added persistent database storage
-* Added `.dockerignore`
-* Tested the complete application stack
-* Troubleshot and resolved a host port conflict
+### 5. Non-root containers improve security
 
-The application is now ready for the next stage of the platform:
+Both application containers run as non-root users:
+
+```text
+Backend → node
+Frontend → nginx
+```
+
+This follows the principle of least privilege.
+
+---
+
+### 6. Health checks require accurate port configuration
+
+The frontend initially failed because the health check did not match the actual Nginx listening port and address behavior.
+
+The final validation confirmed:
+
+```text
+127.0.0.1:8080 → HTTP 200 OK
+```
+
+---
+
+# 12. Current Docker Status
+
+The Docker containerization phase is complete.
+
+The application currently runs as:
+
+```text
+PostgreSQL
+    ↓
+Backend API
+    ↓
+Frontend
+```
+
+All primary containers have been validated.
+
+Current status:
+
+```text
+Frontend     → Healthy
+Backend      → Healthy
+PostgreSQL   → Running
+```
+
+The Docker layer now provides the foundation for the next stage of the project:
 
 ```text
 Docker
-   │
-   ▼
+   ↓
 Terraform Infrastructure
-   │
-   ▼
-Amazon ECR
-   │
-   ▼
+   ↓
+AWS VPC
+   ↓
 Amazon EKS
+   ↓
+Kubernetes
 ```
+
+---
+
+## Next Phase
+
+The next major phase is:
+
+```text
+Terraform Infrastructure
+```
+
+The infrastructure will eventually support:
+
+```text
+AWS VPC
+    ↓
+Subnets
+    ↓
+Routing
+    ↓
+Security Groups
+    ↓
+IAM
+    ↓
+ECR
+    ↓
+EKS
+```
+
+The infrastructure will be built incrementally and validated step by step before moving to Kubernetes deployment.
