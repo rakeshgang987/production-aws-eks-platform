@@ -7,3 +7,43 @@ output "vpc_cidr_block" {
   description = "CIDR block of the VPC"
   value       = module.vpc.vpc_cidr_block
 }
+
+output "public_subnet_ids" {
+  description = "IDs of the public subnets"
+  value       = module.vpc.public_subnet_ids
+}
+
+output "private_subnet_ids" {
+  description = "IDs of the private subnets"
+  value       = module.vpc.private_subnet_ids
+}
+
+output "eks_cluster_name" {
+  description = "Name of the EKS cluster"
+  value       = module.eks.cluster_name
+}
+
+output "eks_cluster_endpoint" {
+  description = "Endpoint of the EKS cluster"
+  value       = module.eks.cluster_endpoint
+}
+
+output "eks_cluster_arn" {
+  description = "ARN of the EKS cluster"
+  value       = module.eks.cluster_arn
+}
+
+output "eks_node_group_name" {
+  description = "Name of the EKS managed node group"
+  value       = module.eks.node_group_name
+}
+
+output "backend_repository_url" {
+  description = "Backend ECR repository URL"
+  value       = module.ecr_backend.repository_url
+}
+
+output "frontend_repository_url" {
+  description = "Frontend ECR repository URL"
+  value       = module.ecr_frontend.repository_url
+}
