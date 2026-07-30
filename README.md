@@ -118,8 +118,14 @@ production-aws-eks-platform/
 │   └── .dockerignore
 │
 ├── terraform/
+│   ├── bootstrap/
 │   ├── environments/
 │   │   └── dev/
+│   │       ├── backend.tf
+│   │       ├── main.tf
+│   │       ├── outputs.tf
+│   │       ├── providers.tf
+│   │       └── variables.tf
 │   │
 │   └── modules/
 │       ├── ecr/
@@ -136,6 +142,15 @@ production-aws-eks-platform/
 │   │   └── architecture.md
 │   ├── docker/
 │   │   └── docker.md
+│   ├── terraform/
+│   │   ├── README.md
+│   │   ├── architecture.md
+│   │   ├── backend.md
+│   │   ├── bootstrap.md
+│   │   ├── environment.md
+│   │   ├── modules.md
+│   │   ├── testing.md
+│   │   └── workflow.md
 │   └── requirements.md
 │
 ├── scripts/
@@ -167,8 +182,8 @@ production-aws-eks-platform/
 * AWS
 * Terraform
 * Amazon VPC
-* Amazon EKS
 * Amazon ECR
+* Amazon EKS
 
 ### Kubernetes
 
@@ -203,9 +218,6 @@ AI assistance is integrated into the engineering workflow to support:
 * Cost optimization
 
 AI is used as an engineering assistant. Infrastructure changes are reviewed, tested, and verified by the engineer before being applied.
-
----
-
 ## 🚀 Project Roadmap
 
 ### Phase 1 — Application ✅
@@ -237,31 +249,48 @@ AI is used as an engineering assistant. Infrastructure changes are reviewed, tes
 * [x] Docker documentation
 * [ ] Final container security review
 
-### Phase 3 — AWS Infrastructure 🚧
+### Phase 3 — AWS Infrastructure ✅
 
 * [x] Terraform project structure
-* [x] Terraform VPC module
-* [x] AWS VPC foundation
+* [x] Terraform backend configuration
+* [x] Terraform bootstrap configuration
+* [x] Reusable Terraform module architecture
+* [x] Environment-based Terraform structure
+* [x] AWS provider configuration
 * [x] Terraform variables and outputs
-* [x] Terraform validation and planning
-* [ ] Public and private subnet design
-* [ ] Route tables
-* [ ] Internet Gateway
-* [ ] NAT Gateway
-* [ ] Security groups
-* [ ] IAM configuration
-* [ ] Amazon ECR
-* [ ] Amazon EKS
+* [x] Terraform validation
+* [x] Terraform formatting
+* [x] Terraform planning
+* [x] AWS VPC
+* [x] Public subnets
+* [x] Private subnets
+* [x] Internet Gateway
+* [x] NAT Gateway
+* [x] Elastic IP
+* [x] Public route tables
+* [x] Private route tables
+* [x] Route table associations
+* [x] Security groups
+* [x] IAM configuration
+* [x] Amazon ECR
+* [x] Amazon EKS module integration
+* [x] Production-style Terraform architecture
+* [x] Comprehensive Terraform documentation
+* [x] Terraform testing and validation
 
-### Phase 4 — Kubernetes
+### Phase 4 — Kubernetes 🚧
 
-* [ ] Deployments
-* [ ] Services
+* [ ] Namespace
 * [ ] ConfigMaps
 * [ ] Secrets
+* [ ] PostgreSQL Deployment
+* [ ] Backend Deployment
+* [ ] Frontend Deployment
+* [ ] Services
 * [ ] Resource requests and limits
 * [ ] Health probes
 * [ ] Ingress
+* [ ] End-to-end Kubernetes deployment
 
 ### Phase 5 — Helm
 
@@ -277,6 +306,7 @@ AI is used as an engineering assistant. Infrastructure changes are reviewed, tes
 * [ ] Docker image build
 * [ ] Image security scanning
 * [ ] Push images to Amazon ECR
+* [ ] Deploy to Amazon EKS
 
 ### Phase 7 — GitOps
 
@@ -290,23 +320,25 @@ AI is used as an engineering assistant. Infrastructure changes are reviewed, tes
 * [ ] Grafana
 * [ ] Loki
 * [ ] Centralized logging
-* [ ] Metrics and dashboards
+* [ ] Metrics
+* [ ] Dashboards
 * [ ] Alerting
 
 ### Phase 9 — AI-Assisted DevOps
 
 * [ ] Terraform plan analysis
-* [ ] Kubernetes troubleshooting workflow
+* [ ] Kubernetes troubleshooting
 * [ ] CI/CD failure analysis
 * [ ] Log analysis
 * [ ] Incident investigation
-* [ ] Cost and security recommendations
+* [ ] Cost optimization
+* [ ] Security recommendations
 
 ---
 
 ## 📊 Current Progress
 
-### Completed
+### ✅ Completed
 
 #### Application
 
@@ -316,7 +348,7 @@ AI is used as an engineering assistant. Infrastructure changes are reviewed, tes
 * [x] Products API
 * [x] Product creation API
 * [x] PostgreSQL database integration
-* [x] React frontend application
+* [x] React frontend
 * [x] Frontend-to-backend API communication
 * [x] CORS configuration
 * [x] Application documentation
@@ -325,44 +357,58 @@ AI is used as an engineering assistant. Infrastructure changes are reviewed, tes
 
 * [x] Backend Dockerfile
 * [x] Frontend multi-stage Dockerfile
-* [x] Nginx frontend runtime
-* [x] Non-root container execution
+* [x] Nginx runtime
+* [x] Non-root containers
 * [x] PostgreSQL container
-* [x] Docker Compose orchestration
-* [x] Docker container networking
-* [x] Persistent PostgreSQL storage
-* [x] Container health checks
-* [x] Docker troubleshooting and port conflict resolution
+* [x] Docker Compose
+* [x] Container networking
+* [x] Persistent storage
+* [x] Health checks
+* [x] Docker troubleshooting
 * [x] Docker documentation
 
-#### Terraform Foundation
+#### Terraform Infrastructure
 
-* [x] Terraform environment structure
-* [x] Reusable VPC module
-* [x] Terraform variables
-* [x] Terraform outputs
+* [x] Terraform bootstrap configuration
+* [x] Remote backend configuration
+* [x] Environment-based structure
+* [x] Reusable Terraform modules
 * [x] AWS provider configuration
-* [x] Terraform validation
-* [x] Terraform plan
-* [x] AWS VPC foundation
+* [x] Variable management
+* [x] Outputs
+* [x] VPC
+* [x] Public subnets
+* [x] Private subnets
+* [x] Internet Gateway
+* [x] NAT Gateway
+* [x] Elastic IP
+* [x] Route tables
+* [x] Route table associations
+* [x] Security groups
+* [x] IAM module
+* [x] Amazon ECR module
+* [x] Amazon EKS module integration
+* [x] Terraform testing
+* [x] Comprehensive Terraform documentation
 
 ---
 
-### Currently Working On
+### 🚧 Currently Working On
 
-The next major milestone is completing the Terraform-managed AWS networking infrastructure.
+The next major milestone is deploying the application to Kubernetes.
 
-Planned work:
+Upcoming work includes:
 
-* [ ] Public subnet design
-* [ ] Private subnet design
-* [ ] Internet Gateway
-* [ ] NAT Gateway
-* [ ] Route tables
-* [ ] Security groups
-* [ ] IAM configuration
-* [ ] Amazon ECR
-* [ ] Amazon EKS
+* [ ] Kubernetes manifests
+* [ ] Namespace
+* [ ] ConfigMaps
+* [ ] Secrets
+* [ ] PostgreSQL Deployment
+* [ ] Backend Deployment
+* [ ] Frontend Deployment
+* [ ] Services
+* [ ] Ingress
+* [ ] Kubernetes testing
 
 ---
 
@@ -377,6 +423,34 @@ Detailed documentation is maintained under the `docs/` directory.
 ### Docker
 
 * [Docker Containerization](docs/docker/docker.md)
+
+### Terraform
+
+The Terraform phase has been fully documented with detailed implementation guides, architecture explanations, testing procedures, troubleshooting notes, and engineering decisions.
+
+#### Terraform Documentation Index
+
+* [Terraform Documentation Home](docs/terraform/README.md)
+* [Terraform Architecture](docs/terraform/architecture.md)
+* [Terraform Bootstrap](docs/terraform/bootstrap.md)
+* [Terraform Remote Backend](docs/terraform/backend.md)
+* [Terraform Modules](docs/terraform/modules.md)
+* [Terraform Environment Structure](docs/terraform/environment.md)
+* [Terraform Workflow](docs/terraform/workflow.md)
+* [Terraform Testing & Validation](docs/terraform/testing.md)
+
+These documents cover:
+
+* Project architecture
+* Bootstrap process
+* Remote backend configuration
+* Module design
+* Environment structure
+* Infrastructure workflow
+* Testing and validation
+* Troubleshooting
+* Best practices
+* Engineering decisions
 
 ### Application
 
@@ -455,6 +529,18 @@ Engineer Verification
 Apply Infrastructure
 ```
 
+```text
+Kubernetes Deployment
+        ↓
+AI-Assisted Troubleshooting
+        ↓
+Configuration Review
+        ↓
+Engineer Validation
+        ↓
+Deploy to Cluster
+```
+
 The goal is to demonstrate practical AI-assisted DevOps workflows while maintaining human ownership of technical decisions.
 
 ---
@@ -470,11 +556,13 @@ Application
     ↓
 Containerization
     ↓
-Infrastructure
+Infrastructure as Code
     ↓
 Cloud
     ↓
 Kubernetes
+    ↓
+Helm
     ↓
 CI/CD
     ↓
@@ -505,7 +593,7 @@ Document
 Commit
 ```
 
-The objective is to build a production-style platform while understanding the engineering decisions, trade-offs, failures, and troubleshooting involved at every stage.
+The objective is to build a production-style platform while understanding the engineering decisions, trade-offs, failures, troubleshooting, and operational practices involved at every stage of the DevOps lifecycle.
 
 ---
 
@@ -513,16 +601,115 @@ The objective is to build a production-style platform while understanding the en
 
 **Rakesh Gangwar**
 
-DevOps Engineer focused on AWS, Terraform, Docker, Kubernetes, CI/CD, and cloud-native technologies.
+DevOps Engineer focused on AWS, Terraform, Docker, Kubernetes, CI/CD, Infrastructure as Code, and cloud-native technologies.
 
 ---
 
 ## 🚧 Project Status
 
-**Active Development**
+**Status:** 🟢 Active Development
 
-Application development and Docker containerization are complete.
+### ✅ Completed Milestones
 
-The Terraform infrastructure foundation is complete, including the reusable VPC module and AWS VPC foundation.
+- Application Development
+- Docker Containerization
+- Terraform Infrastructure
+- AWS Networking Foundation
+- Remote Backend Configuration
+- Terraform Module Architecture
+- Environment-Based Infrastructure
+- Infrastructure Documentation
 
-The next milestone is to expand the VPC into a complete AWS networking layer with subnets, routing, NAT, security groups, and IAM before proceeding toward Amazon ECR and Amazon EKS.
+### 🚧 Current Milestone
+
+The project is now entering the **Kubernetes** phase.
+
+The next objective is to deploy the complete application stack onto Amazon EKS using production-style Kubernetes manifests.
+
+Upcoming work includes:
+
+- Kubernetes Namespace
+- ConfigMaps
+- Secrets
+- PostgreSQL Deployment
+- Backend Deployment
+- Frontend Deployment
+- Services
+- Ingress
+- Resource Requests & Limits
+- Liveness & Readiness Probes
+- Persistent Storage
+- End-to-End Kubernetes Validation
+
+---
+
+## 📈 Project Progress
+
+```text
+Application                 ████████████████████ 100%
+
+Docker                      ████████████████████ 100%
+
+Terraform                   ████████████████████ 100%
+
+Kubernetes                  ░░░░░░░░░░░░░░░░░░░░   0%
+
+Helm                        ░░░░░░░░░░░░░░░░░░░░   0%
+
+GitHub Actions              ░░░░░░░░░░░░░░░░░░░░   0%
+
+ArgoCD                      ░░░░░░░░░░░░░░░░░░░░   0%
+
+Observability               ░░░░░░░░░░░░░░░░░░░░   0%
+```
+
+---
+
+## 🎯 Long-Term Goal
+
+This repository is intended to become a complete production-style DevOps reference project demonstrating:
+
+- Modern application development
+- Containerization with Docker
+- Infrastructure as Code using Terraform
+- AWS cloud infrastructure
+- Kubernetes orchestration
+- Helm package management
+- CI/CD automation
+- GitOps workflows
+- Observability
+- Security best practices
+- AI-assisted DevOps engineering
+
+The emphasis is not only on building infrastructure but also on documenting engineering decisions, implementation details, troubleshooting, testing, and lessons learned throughout the project.
+
+---
+
+## 🙌 Acknowledgements
+
+This project is built through continuous learning, hands-on experimentation, testing, troubleshooting, and iterative improvement.
+
+Every completed milestone includes implementation, validation, documentation, and engineering analysis to create a portfolio that reflects production-oriented DevOps practices rather than isolated tool demonstrations.
+
+---
+
+## ⭐ Support
+
+If you found this project useful:
+
+- ⭐ Star the repository
+- 🍴 Fork the repository
+- 💡 Share feedback or suggestions
+- 🛠️ Follow future project updates as new phases are completed
+
+---
+
+## 📅 Next Milestone
+
+➡️ **Production Kubernetes Deployment on Amazon EKS**
+
+The Terraform phase has been completed successfully.
+
+The next phase focuses on deploying the application to Kubernetes, followed by Helm packaging, CI/CD automation, GitOps with ArgoCD, and complete observability using Prometheus, Grafana, and Loki.
+
+Stay tuned for the next milestone! 🚀
