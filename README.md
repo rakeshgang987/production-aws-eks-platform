@@ -711,5 +711,3 @@ If you found this project useful:
 The Terraform phase has been completed successfully.
 
 The next phase focuses on deploying the application to Kubernetes, followed by Helm packaging, CI/CD automation, GitOps with ArgoCD, and complete observability using Prometheus, Grafana, and Loki.
-
-Stay tuned for the next milestone! 🚀

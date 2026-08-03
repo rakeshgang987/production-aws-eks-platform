@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function App() {
   const [products, setProducts] = useState([]);
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
 
   const fetchProducts = async () => {
-    const response = await fetch("http://localhost:3000/api/products");
+    const response = await fetch(`${API_URL}/api/products`);
     const data = await response.json();
     setProducts(data);
   };
@@ -19,7 +21,7 @@ function App() {
   const addProduct = async (event) => {
     event.preventDefault();
 
-    await fetch("http://localhost:3000/api/products", {
+    await fetch(`${API_URL}/api/products`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: production-eks-platform
+  labels:
+    app.kubernetes.io/name: production-eks-platform
+    app.kubernetes.io/environment: dev
