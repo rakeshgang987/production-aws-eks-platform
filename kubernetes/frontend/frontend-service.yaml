@@ -3,7 +3,7 @@ kind: Service
 
 metadata:
   name: frontend-service
-  namespace: production-app
+  namespace: production-eks-platform
 
 spec:
   selector:

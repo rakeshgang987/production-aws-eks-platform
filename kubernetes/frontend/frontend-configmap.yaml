@@ -3,7 +3,7 @@ kind: ConfigMap
 
 metadata:
   name: frontend-config
-  namespace: production-app
+  namespace: production-eks-platform
 
 data:
-  VITE_API_URL: "http://backend-service:3000"
+  VITE_API_URL: "/api"

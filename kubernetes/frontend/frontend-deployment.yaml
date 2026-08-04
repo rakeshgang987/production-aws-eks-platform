@@ -3,7 +3,13 @@ kind: Deployment
 
 metadata:
   name: frontend
-  namespace: production-app
+  namespace: production-eks-platform
+
+  labels:
+    app: frontend
+
+  annotations:
+    description: "Frontend web application deployment for production EKS platform"
 
 spec:
   replicas: 2
@@ -21,6 +27,7 @@ spec:
       containers:
         - name: frontend
           image: your-dockerhub-username/frontend:latest
+          imagePullPolicy: IfNotPresent
 
           ports:
             - containerPort: 8080
@@ -28,3 +35,45 @@ spec:
           envFrom:
             - configMapRef:
                 name: frontend-config
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8080
+
+            failureThreshold: 30
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 101
+            allowPrivilegeEscalation: false

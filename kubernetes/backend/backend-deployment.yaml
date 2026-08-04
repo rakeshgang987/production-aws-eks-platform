@@ -4,8 +4,12 @@ kind: Deployment
 metadata:
   name: backend
   namespace: production-eks-platform
+
   labels:
     app: backend
+
+  annotations:
+    description: "Backend API deployment for production EKS platform"
 
 spec:
   replicas: 1
@@ -35,10 +39,28 @@ spec:
             - secretRef:
                 name: backend-secret
 
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3000
+
+            failureThreshold: 30
+            periodSeconds: 10
+
           livenessProbe:
             httpGet:
               path: /health
               port: 3000
+
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 5
@@ -48,7 +70,13 @@ spec:
             httpGet:
               path: /health
               port: 3000
+
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 3
+
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
