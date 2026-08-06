@@ -12,7 +12,7 @@ metadata:
     description: "Backend API deployment for production EKS platform"
 
 spec:
-  replicas: 1
+  replicas: 2
 
   selector:
     matchLabels:
@@ -24,6 +24,8 @@ spec:
         app: backend
 
     spec:
+      serviceAccountName: backend-service-account
+
       containers:
         - name: backend
           image: application-backend:latest

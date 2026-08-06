@@ -37,6 +37,8 @@ spec:
 
     spec:
 
+      serviceAccountName: postgres-service-account
+
       securityContext:
         fsGroup: 999
 

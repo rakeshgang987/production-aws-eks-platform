@@ -24,6 +24,8 @@ spec:
         app: frontend
 
     spec:
+      serviceAccountName: frontend-service-account
+
       containers:
         - name: frontend
           image: your-dockerhub-username/frontend:latest
