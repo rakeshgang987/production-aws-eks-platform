@@ -5,44 +5,70 @@ metadata:
   name: postgres
   namespace: production-eks-platform
 
+  labels:
+    app: postgres
+    component: database
+    tier: backend
+    project: production-aws-eks-platform
+
 spec:
+
+  # Headless service required for StatefulSet identity
   serviceName: postgres-headless
 
-  replicas: 2
+
+  # Single PostgreSQL instance with persistent storage
+  # Database HA will be handled later using PostgreSQL operators
+  replicas: 1
+
 
   selector:
     matchLabels:
       app: postgres
 
+
   template:
+
     metadata:
       labels:
         app: postgres
+        component: database
+
 
     spec:
+
       securityContext:
         fsGroup: 999
 
+
       containers:
+
         - name: postgres
+
           image: postgres:16-alpine
 
+
           ports:
+
             - containerPort: 5432
               name: postgres
 
+
           env:
+
             - name: POSTGRES_DB
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_DB
 
+
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_USER
+
 
             - name: POSTGRES_PASSWORD
               valueFrom:
@@ -51,7 +77,9 @@ spec:
                   key: POSTGRES_PASSWORD
 
 
+
           resources:
+
             requests:
               cpu: "500m"
               memory: "512Mi"
@@ -61,56 +89,80 @@ spec:
               memory: "1Gi"
 
 
-          startupProbe:
-            exec:
-              command:
-                - pg_isready
-                - -U
-                - $(POSTGRES_USER)
-
-            failureThreshold: 30
-            periodSeconds: 10
-
-
-          livenessProbe:
-            exec:
-              command:
-                - pg_isready
-                - -U
-                - $(POSTGRES_USER)
-
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-
-
-          readinessProbe:
-            exec:
-              command:
-                - pg_isready
-                - -U
-                - $(POSTGRES_USER)
-
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            timeoutSeconds: 5
-            failureThreshold: 3
-
 
           volumeMounts:
+
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
 
 
+
+          readinessProbe:
+
+            exec:
+              command:
+
+                - pg_isready
+                - -U
+                - postgres
+
+
+            initialDelaySeconds: 10
+
+            periodSeconds: 10
+
+            timeoutSeconds: 5
+
+            failureThreshold: 5
+
+
+
+          livenessProbe:
+
+            exec:
+              command:
+
+                - pg_isready
+                - -U
+                - postgres
+
+
+            initialDelaySeconds: 30
+
+            periodSeconds: 20
+
+            timeoutSeconds: 5
+
+            failureThreshold: 5
+
+
+
+  # Automatically creates PVC for PostgreSQL
   volumeClaimTemplates:
+
     - metadata:
+
         name: postgres-storage
 
+
       spec:
+
         accessModes:
+
           - ReadWriteOnce
 
+
+        # Minikube:
+        # standard storage class
+        #
+        # AWS EKS:
+        # change to gp3 using AWS EBS CSI Driver
+
+        storageClassName: standard
+
+
         resources:
+
           requests:
+
             storage: 10Gi

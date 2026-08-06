@@ -1,0 +1,116 @@
+###############################################################
+# Resource: Backend Horizontal Pod Autoscaler (HPA)
+#
+# Project:
+# Production AWS EKS Platform
+#
+# Purpose:
+# Automatically scales the backend Deployment based on
+# CPU and Memory utilization.
+#
+# Current Metrics:
+# - CPU Utilization
+# - Memory Utilization
+#
+# Future Enhancements:
+# - Prometheus Custom Metrics
+# - External Metrics
+# - KEDA Event-Driven Autoscaling
+#
+# Environment:
+# Kubernetes (Local & AWS EKS)
+###############################################################
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+
+metadata:
+  name: backend-hpa
+  namespace: production-eks-platform
+
+  labels:
+    app: backend
+    component: api
+    tier: application
+    project: production-aws-eks-platform
+
+  annotations:
+    description: "Production Horizontal Pod Autoscaler for Backend API"
+
+spec:
+
+  # Target resource managed by this HPA
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+
+  # Maintain at least two backend pods for high availability
+  minReplicas: 2
+
+  # Maximum replicas allowed during heavy traffic
+  maxReplicas: 5
+
+  # Metrics used for autoscaling decisions
+  metrics:
+
+    # Scale based on average CPU utilization
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+    # Scale based on average Memory utilization
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+  # Scaling behavior configuration
+  behavior:
+
+    # Scale up aggressively during traffic spikes
+    scaleUp:
+
+      # Scale immediately when threshold is exceeded
+      stabilizationWindowSeconds: 0
+
+      # Use the policy that allows the fastest scaling
+      selectPolicy: Max
+
+      policies:
+
+        # Increase replicas by up to 100%
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+
+        # Or add up to 4 pods every minute
+        - type: Pods
+          value: 4
+          periodSeconds: 60
+
+    # Scale down conservatively to prevent flapping
+    scaleDown:
+
+      # Wait before reducing replicas
+      stabilizationWindowSeconds: 300
+
+      # Use the safest scale-down policy
+      selectPolicy: Min
+
+      policies:
+
+        # Reduce replicas by up to 50%
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+
+        # Or remove only one pod at a time
+        - type: Pods
+          value: 1
+          periodSeconds: 60
