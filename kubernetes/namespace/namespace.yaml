@@ -1,7 +1,22 @@
 apiVersion: v1
 kind: Namespace
+
 metadata:
   name: production-eks-platform
+
   labels:
     app.kubernetes.io/name: production-eks-platform
     app.kubernetes.io/environment: dev
+
+    # Pod Security Standards
+    # Enforce restricted security profile
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+
+    # Audit violations without blocking
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/audit-version: latest
+
+    # Show warnings to users
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: latest
