@@ -1,0 +1,76 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: backend-network-policy
+  namespace: production-eks-platform
+
+
+spec:
+
+  podSelector:
+
+    matchLabels:
+      app: backend
+
+
+  policyTypes:
+
+    - Ingress
+    - Egress
+
+
+
+  ingress:
+
+    # Allow frontend to call backend API
+
+    - from:
+
+        - podSelector:
+
+            matchLabels:
+              app: frontend
+
+
+      ports:
+
+        - protocol: TCP
+          port: 3000
+
+
+
+  egress:
+
+
+    # Allow backend to connect PostgreSQL
+
+    - to:
+
+        - podSelector:
+
+            matchLabels:
+              app: postgres
+
+
+      ports:
+
+        - protocol: TCP
+          port: 5432
+
+
+
+    # Allow DNS resolution
+
+    - to:
+
+        - namespaceSelector:
+
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+
+
+      ports:
+
+        - protocol: UDP
+          port: 53

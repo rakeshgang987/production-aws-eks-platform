@@ -1,0 +1,74 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+
+  name: postgres-network-policy
+
+  namespace: production-eks-platform
+
+
+
+spec:
+
+
+  podSelector:
+
+    matchLabels:
+
+      app: postgres
+
+
+
+  policyTypes:
+
+    - Ingress
+    - Egress
+
+
+
+  ingress:
+
+
+    # Only backend can access database
+
+    - from:
+
+
+        - podSelector:
+
+            matchLabels:
+
+              app: backend
+
+
+      ports:
+
+
+        - protocol: TCP
+
+          port: 5432
+
+
+
+  egress:
+
+
+    # Allow DNS resolution
+
+    - to:
+
+
+        - namespaceSelector:
+
+            matchLabels:
+
+              kubernetes.io/metadata.name: kube-system
+
+
+      ports:
+
+
+        - protocol: UDP
+
+          port: 53

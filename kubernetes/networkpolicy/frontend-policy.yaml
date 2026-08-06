@@ -1,0 +1,72 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: frontend-network-policy
+  namespace: production-eks-platform
+
+spec:
+
+  podSelector:
+
+    matchLabels:
+      app: frontend
+
+
+  policyTypes:
+
+    - Ingress
+    - Egress
+
+
+  ingress:
+
+    # Allow traffic from ingress controller
+    - from:
+
+        - namespaceSelector:
+
+            matchLabels:
+              name: ingress-nginx
+
+
+      ports:
+
+        - protocol: TCP
+          port: 8080
+
+
+
+  egress:
+
+    # Allow frontend to communicate with backend
+
+    - to:
+
+        - podSelector:
+
+            matchLabels:
+              app: backend
+
+
+      ports:
+
+        - protocol: TCP
+          port: 3000
+
+
+
+    # Allow DNS resolution
+
+    - to:
+
+        - namespaceSelector:
+
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+
+
+      ports:
+
+        - protocol: UDP
+          port: 53
