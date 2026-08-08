@@ -4,7 +4,6 @@ kind: Ingress
 metadata:
   name: production-app-ingress
   namespace: production-eks-platform
-
   annotations:
     description: "Ingress routing for production EKS platform"
 
@@ -16,7 +15,6 @@ spec:
 
       http:
         paths:
-
           - path: /
             pathType: Prefix
             backend:
@@ -24,7 +22,6 @@ spec:
                 name: frontend-service
                 port:
                   number: 80
-
 
           - path: /api
             pathType: Prefix

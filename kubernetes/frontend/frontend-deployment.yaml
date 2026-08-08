@@ -4,10 +4,8 @@ kind: Deployment
 metadata:
   name: frontend
   namespace: production-eks-platform
-
   labels:
     app: frontend
-
   annotations:
     description: "Frontend web application deployment for production EKS platform"
 
@@ -26,9 +24,12 @@ spec:
     spec:
       serviceAccountName: frontend-service-account
 
+      securityContext:
+        runAsNonRoot: true
+
       containers:
         - name: frontend
-          image: your-dockerhub-username/frontend:latest
+          image: docker.io/library/application-frontend:latest
           imagePullPolicy: IfNotPresent
 
           ports:
@@ -51,7 +52,6 @@ spec:
             httpGet:
               path: /
               port: 8080
-
             failureThreshold: 30
             periodSeconds: 10
 
@@ -59,7 +59,6 @@ spec:
             httpGet:
               path: /
               port: 8080
-
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 5
@@ -69,7 +68,6 @@ spec:
             httpGet:
               path: /
               port: 8080
-
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3

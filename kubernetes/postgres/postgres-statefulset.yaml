@@ -42,14 +42,18 @@ spec:
       # Pod level security
       # Required for PostgreSQL volume permissions
       securityContext:
-        fsGroup: 999
+        runAsNonRoot: true
+        runAsUser: 70
+        runAsGroup: 70
+        
+        fsGroup: 70
 
 
       containers:
 
         - name: postgres
 
-          image: postgres:16-alpine
+          image: docker.io/library/postgres:16-alpine
 
 
           securityContext:
@@ -76,7 +80,7 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_DB
-
+            
 
             - name: POSTGRES_USER
               valueFrom:
@@ -91,7 +95,8 @@ spec:
                   name: postgres-secret
                   key: POSTGRES_PASSWORD
 
-
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
 
           resources:
 

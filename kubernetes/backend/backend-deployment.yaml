@@ -26,9 +26,14 @@ spec:
     spec:
       serviceAccountName: backend-service-account
 
+      # Pod-level security context required by Kyverno
+      securityContext:
+        runAsNonRoot: true
+
       containers:
         - name: backend
-          image: application-backend:latest
+
+          image: docker.io/library/application-backend:latest
           imagePullPolicy: IfNotPresent
 
           ports:
@@ -78,6 +83,7 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
 
+          # Container-level security hardening
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
