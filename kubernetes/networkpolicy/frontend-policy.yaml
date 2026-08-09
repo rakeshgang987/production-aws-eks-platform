@@ -27,7 +27,7 @@ spec:
         - namespaceSelector:
 
             matchLabels:
-              name: ingress-nginx
+              kubernetes.io/metadata.name: ingress-nginx
 
 
       ports:
