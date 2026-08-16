@@ -1,193 +1,36 @@
 # Production AWS EKS Platform
 
-A production-style DevOps platform built as a single monorepo. The project demonstrates the complete lifecycle of a containerized application — from application development and containerization to infrastructure provisioning, Kubernetes, Helm, CI/CD, GitOps, observability, security, and AI-assisted DevOps operations.
+A production-style DevOps platform built as a single monorepo. The project demonstrates the complete lifecycle of a containerized application, from application development and containerization to Terraform, AWS, Kubernetes, Helm, CI/CD, GitOps, observability, security, and AI-assisted DevOps.
 
-The platform is developed incrementally. Each milestone is designed, implemented, tested, troubleshot, documented, and validated before moving to the next stage.
+The platform is developed incrementally. Each phase is designed, implemented, tested, troubleshot, documented, and validated before moving to the next phase.
 
 ---
 
 ## 🎯 Project Objective
 
-The goal is to build a production-oriented DevOps platform using modern cloud-native practices and understand the engineering decisions behind each layer.
+The goal is to build a production-style DevOps platform using:
 
-The platform covers:
-
-* Application development
+* Node.js, Express, React, Vite, PostgreSQL
 * Docker and Docker Compose
-* Terraform Infrastructure as Code
-* AWS VPC networking
-* Amazon ECR
-* Amazon EKS
+* Terraform
+* AWS VPC, ECR, and EKS
 * Kubernetes
 * Helm
-* GitHub Actions CI/CD
-* ArgoCD GitOps
-* Prometheus
-* Grafana
-* Loki
-* Security engineering
-* Troubleshooting and validation
+* GitHub Actions
+* ArgoCD
+* Prometheus, Grafana, and Loki
+* Security and operational practices
 * AI-assisted DevOps workflows
 
-Development and validation are performed locally whenever possible before moving workloads to AWS EKS. This reduces unnecessary cloud costs while allowing each platform layer to be tested independently.
+The project follows a **local-first development strategy**.
+
+Kubernetes and Helm workloads are developed and validated locally using Minikube before AWS deployment. The complete platform will be integrated and then tested on Amazon EKS as the final cloud validation stage.
+
+This reduces unnecessary AWS costs while allowing each layer to be tested independently.
 
 ---
 
-## 🏗️ High-Level Architecture
-
-The long-term platform architecture is:
-
-```text
-                              Users
-                                │
-                                ▼
-                         ┌──────────────┐
-                         │   Ingress    │
-                         └──────┬───────┘
-                                │
-                  ┌─────────────┴─────────────┐
-                  │                           │
-                  ▼                           ▼
-          ┌──────────────┐            ┌──────────────┐
-          │   Frontend   │            │ Backend API  │
-          │ React + Nginx│            │Node + Express│
-          └──────────────┘            └──────┬───────┘
-                                             │
-                                             ▼
-                                      ┌──────────────┐
-                                      │  PostgreSQL  │
-                                      └──────────────┘
-
-                           Amazon EKS
-                                │
-             ┌──────────────────┼──────────────────┐
-             │                  │                  │
-             ▼                  ▼                  ▼
-           Helm               ArgoCD        Observability
-                                                  │
-                                       ┌──────────┼──────────┐
-                                       │          │          │
-                                       ▼          ▼          ▼
-                                   Prometheus  Grafana     Loki
-```
-
-The complete platform is being implemented in phases rather than deploying everything simultaneously.
-
----
-
-## 🏠 Current Local Architecture
-
-The application has been developed and validated locally using Docker Compose and Kubernetes/Minikube.
-
-### Docker Compose
-
-```text
-┌─────────────────────────────────────────────────────┐
-│              Docker Compose Environment             │
-│                                                     │
-│  ┌──────────────┐      ┌──────────────┐             │
-│  │   Frontend   │─────▶│ Backend API  │             │
-│  │ React + Nginx│      │ Node + Express│            │
-│  │    :5173     │      │    :3000     │             │
-│  └──────────────┘      └──────┬───────┘             │
-│                               │                     │
-│                               ▼                     │
-│                       ┌──────────────┐              │
-│                       │  PostgreSQL  │              │
-│                       │    :5432     │              │
-│                       └──────────────┘              │
-│                                                     │
-│            Docker Network + Persistent Volume       │
-└─────────────────────────────────────────────────────┘
-```
-
-### Kubernetes / Helm
-
-```text
-                         Ingress
-                            │
-                 ┌──────────┴──────────┐
-                 │                     │
-                 ▼                     ▼
-          Frontend Service       Backend Service
-                 │                     │
-                 ▼                     ▼
-          Frontend Pods           Backend Pods
-                                       │
-                                       ▼
-                              PostgreSQL Service
-                                       │
-                                       ▼
-                              PostgreSQL Pod
-                                       │
-                                       ▼
-                              Persistent Storage
-```
-
-The Kubernetes application stack is packaged using Helm and validated locally with Minikube.
-
----
-
-## ☸️ Kubernetes Platform
-
-The Kubernetes layer follows production-oriented design principles:
-
-* Namespace isolation
-* Deployments for stateless frontend/backend workloads
-* StatefulSet for PostgreSQL
-* Kubernetes Services for application communication
-* Persistent storage for PostgreSQL
-* Resource requests and limits
-* Horizontal Pod Autoscaling
-* NetworkPolicies
-* RBAC and ServiceAccounts
-* ResourceQuota and LimitRange
-* Pod Security Standards
-* Kyverno admission policies
-* Health probes
-* Ingress routing
-
-Detailed Kubernetes architecture and implementation information is maintained under [`docs/kubernetes/`](docs/kubernetes/).
-
----
-
-## 📦 Helm
-
-The Kubernetes application stack has been packaged into a reusable Helm chart.
-
-```text
-helm/
-├── Chart.yaml
-├── values.yaml
-├── .helmignore
-└── templates/
-```
-
-The chart manages the application resources required by the platform, including workloads, Services, Ingress, configuration, security, autoscaling, networking, RBAC, resource governance, and persistent storage.
-
-The Helm implementation has been validated locally using:
-
-```text
-helm lint
-      ↓
-helm template
-      ↓
-kubectl dry-run
-      ↓
-helm upgrade --install
-      ↓
-rollout validation
-      ↓
-Ingress/API testing
-```
-
-Detailed Helm documentation is available under [`docs/helm/`](docs/helm/).
-
----
-
-## 🔗 Platform Flow
-
-The overall engineering flow is:
+## 🏗️ Platform Lifecycle
 
 ```text
 Application
@@ -202,16 +45,179 @@ Kubernetes
     ↓
 Helm
     ↓
-GitHub Actions
+CI/CD
     ↓
-Amazon ECR
+GitOps
     ↓
-ArgoCD
+Observability
     ↓
-Amazon EKS
+Incident Response
     ↓
-Prometheus + Grafana + Loki
+AI-Assisted DevOps
+    ↓
+Final EKS Integration Testing
 ```
+
+---
+
+## 🏗️ High-Level Architecture
+
+```text
+                         Users
+                           │
+                           ▼
+                      Ingress
+                           │
+              ┌────────────┴────────────┐
+              ▼                         ▼
+         Frontend                  Backend API
+       React + Nginx             Node + Express
+                                      │
+                                      ▼
+                                  PostgreSQL
+
+
+                     Amazon EKS
+                         │
+              ┌──────────┼──────────┐
+              ▼          ▼          ▼
+            Helm      ArgoCD   Observability
+                                  │
+                         ┌────────┼────────┐
+                         ▼        ▼        ▼
+                     Prometheus Grafana  Loki
+```
+
+The complete architecture will be implemented progressively rather than deployed all at once.
+
+---
+
+## 🏠 Local Development Architecture
+
+### Docker Compose
+
+```text
+Frontend
+   │
+   ▼
+Backend API
+   │
+   ▼
+PostgreSQL
+```
+
+Docker Compose provides:
+
+* Local application orchestration
+* Container networking
+* PostgreSQL persistence
+* Health checks
+* Development validation
+
+### Kubernetes / Minikube
+
+```text
+Ingress
+   │
+   ├── Frontend Service → Frontend Pods
+   │
+   └── Backend Service → Backend Pods
+                              │
+                              ▼
+                       PostgreSQL Service
+                              │
+                              ▼
+                     PostgreSQL StatefulSet
+                              │
+                              ▼
+                       Persistent Storage
+```
+
+Minikube is used to validate Kubernetes, Helm, networking, security, and application behavior before EKS.
+
+---
+
+## ☸️ Kubernetes Architecture
+
+The Kubernetes platform uses:
+
+* Namespace
+* ConfigMaps
+* Secrets
+* Deployments
+* StatefulSet
+* Services
+* Ingress
+* HPA
+* Persistent storage
+* NetworkPolicies
+* RBAC
+* ServiceAccounts
+* ResourceQuota
+* LimitRange
+* Pod Security Standards
+* Kyverno
+
+### Workload Model
+
+Frontend and backend are stateless Deployments.
+
+PostgreSQL is implemented as a StatefulSet because it requires persistent storage and stable workload identity.
+
+### Network Model
+
+Applications communicate through Kubernetes Services rather than Pod IP addresses.
+
+NetworkPolicies provide controlled communication and default-deny behavior where applicable.
+
+---
+
+## 📦 Helm Architecture
+
+The Kubernetes application stack is packaged as a reusable Helm chart.
+
+```text
+helm/
+├── Chart.yaml
+├── values.yaml
+├── .helmignore
+└── templates/
+```
+
+The chart manages:
+
+* Frontend
+* Backend
+* PostgreSQL
+* Services
+* Ingress
+* ConfigMaps
+* Secrets
+* Persistent storage
+* HPA
+* NetworkPolicies
+* RBAC
+* Resource governance
+* Kyverno policies
+
+Helm validation is performed locally using:
+
+```text
+helm lint
+    ↓
+helm template
+    ↓
+kubectl dry-run
+    ↓
+helm upgrade --install
+    ↓
+Rollout validation
+    ↓
+Ingress/API testing
+```
+
+---
+
 ## 📁 Repository Structure
 
 ```text
@@ -261,7 +267,6 @@ production-aws-eks-platform/
 │   └── requirements.md
 │
 ├── scripts/
-│
 └── README.md
 ```
 
@@ -282,9 +287,9 @@ production-aws-eks-platform/
 * Docker
 * Docker Compose
 * Nginx
-* Alpine Linux-based images
+* Alpine-based images
 
-### Cloud & Infrastructure
+### Infrastructure
 
 * AWS
 * Terraform
@@ -297,12 +302,12 @@ production-aws-eks-platform/
 * Kubernetes
 * Helm
 * NGINX Ingress
-* Horizontal Pod Autoscaler
+* HPA
 * NetworkPolicies
 * RBAC
 * Kyverno
 
-### CI/CD & GitOps
+### CI/CD and GitOps
 
 * GitHub Actions
 * ArgoCD
@@ -315,573 +320,14 @@ production-aws-eks-platform/
 
 ---
 
-# 🚀 Project Roadmap
+## 🤖 AI-Assisted DevOps
 
-## Phase 1 — Application ✅
+AI assistance is a **core part of the engineering workflow**, but it is used as a technical assistant rather than a replacement for engineering decisions.
 
-* [x] Backend API foundation
-* [x] Health endpoint
-* [x] Products API
-* [x] Product creation API
-* [x] PostgreSQL integration
-* [x] React frontend
-* [x] Frontend/backend communication
-* [x] CORS configuration
-* [x] Application documentation
-
-## Phase 2 — Containerization ✅
-
-* [x] Backend Dockerfile
-* [x] Frontend multi-stage Dockerfile
-* [x] Nginx runtime
-* [x] Non-root containers
-* [x] PostgreSQL container
-* [x] Docker Compose
-* [x] Container networking
-* [x] Persistent PostgreSQL storage
-* [x] Health checks
-* [x] Docker troubleshooting and documentation
-* [ ] Final container security review
-
-## Phase 3 — AWS Infrastructure ✅
-
-* [x] Terraform project structure
-* [x] Remote backend
-* [x] Terraform bootstrap
-* [x] Reusable modules
-* [x] Environment-based structure
-* [x] AWS provider configuration
-* [x] Variables and outputs
-* [x] Terraform validation and planning
-* [x] AWS VPC
-* [x] Public/private subnets
-* [x] Internet Gateway
-* [x] NAT Gateway
-* [x] Elastic IP
-* [x] Route tables
-* [x] Security groups
-* [x] IAM
-* [x] Amazon ECR
-* [x] Amazon EKS module integration
-* [x] Terraform testing and documentation
-
-## Phase 4 — Kubernetes ✅
-
-* [x] Namespace
-* [x] ConfigMaps and Secrets
-* [x] PostgreSQL StatefulSet
-* [x] PostgreSQL Services
-* [x] Backend Deployment and Service
-* [x] Frontend Deployment and Service
-* [x] Resource requests and limits
-* [x] Startup, liveness, and readiness probes
-* [x] Persistent storage
-* [x] Ingress
-* [x] Horizontal Pod Autoscaling
-* [x] NetworkPolicies
-* [x] RBAC and ServiceAccounts
-* [x] ResourceQuota and LimitRange
-* [x] Pod Security Standards
-* [x] Kyverno security policies
-* [x] Kubernetes validation and testing
-* [x] Troubleshooting and documentation
-
-## Phase 5 — Helm ✅
-
-* [x] Helm chart structure
-* [x] `Chart.yaml`
-* [x] `values.yaml`
-* [x] Helm templates
-* [x] Namespace-aware configuration
-* [x] Values-driven configuration
-* [x] Application workloads
-* [x] PostgreSQL StatefulSet
-* [x] Services and Ingress
-* [x] ConfigMaps and Secrets
-* [x] Persistent storage
-* [x] HPA
-* [x] NetworkPolicies
-* [x] RBAC and ServiceAccounts
-* [x] ResourceQuota and LimitRange
-* [x] Kyverno policies
-* [x] Security contexts
-* [x] Health probes
-* [x] Configuration checksum rollouts
-* [x] Helm linting
-* [x] Template validation
-* [x] Kubernetes dry-run validation
-* [x] Helm install and upgrade validation
-* [x] Minikube deployment testing
-* [x] End-to-end API validation
-* [x] Helm troubleshooting documentation
-
-## Phase 6 — CI/CD 🚧
-
-* [ ] GitHub Actions
-* [ ] Automated application testing
-* [ ] Docker image build automation
-* [ ] Image security scanning
-* [ ] Amazon ECR authentication
-* [ ] Push images to Amazon ECR
-* [ ] Helm-based deployment automation
-* [ ] EKS deployment preparation
-
-## Phase 7 — GitOps
-
-* [ ] ArgoCD
-* [ ] Git-based deployment configuration
-* [ ] Automated synchronization
-* [ ] Application health monitoring
-* [ ] Environment promotion
-* [ ] GitOps troubleshooting and documentation
-
-## Phase 8 — Observability
-
-* [ ] Prometheus
-* [ ] Grafana
-* [ ] Loki
-* [ ] Centralized logging
-* [ ] Kubernetes metrics
-* [ ] Application metrics
-* [ ] Dashboards
-* [ ] Alerting
-* [ ] Observability troubleshooting and documentation
-
-## Phase 9 — AI-Assisted DevOps
-
-* [ ] Terraform plan analysis
-* [ ] Kubernetes troubleshooting
-* [ ] Helm troubleshooting
-* [ ] CI/CD failure analysis
-* [ ] Log analysis
-* [ ] Incident investigation
-* [ ] Security recommendations
-* [ ] Cost optimization
-* [ ] Operational decision support
-
-# 📊 Current Status
-
-**Status:** 🟢 Active Development
-
-The following milestones have been completed:
-
-```text
-Application
-    ↓
-Docker
-    ↓
-Terraform / AWS Infrastructure
-    ↓
-Kubernetes
-    ↓
-Helm
-```
-
-The current Helm implementation has been validated locally using Minikube.
-
-### Current Milestone
-
-**CI/CD Automation with GitHub Actions**
-
-Upcoming work:
-
-* GitHub Actions workflow design
-* Automated application validation
-* Docker image builds
-* Container security scanning
-* Amazon ECR authentication
-* Image publishing
-* Helm-based deployment workflow
-* EKS deployment preparation
-* CI/CD troubleshooting and documentation
-
----
-
-## 📈 Project Progress
-
-```text
-Application                 ████████████████████ 100%
-
-Docker                      ████████████████████ 100%
-
-Terraform                   ████████████████████ 100%
-
-Kubernetes                  ████████████████████ 100%
-
-Helm                        ████████████████████ 100%
-
-GitHub Actions              ░░░░░░░░░░░░░░░░░░░░   0%
-
-ArgoCD                      ░░░░░░░░░░░░░░░░░░░░   0%
-
-Observability               ░░░░░░░░░░░░░░░░░░░░   0%
-
-AI-Assisted Operations      ░░░░░░░░░░░░░░░░░░░░   0%
-```
-
----
-
-# 📚 Documentation
-
-Detailed engineering documentation is maintained under [`docs/`](docs/).
-
-The README intentionally provides a high-level overview while implementation details, troubleshooting, validation procedures, and engineering decisions are maintained in focused documentation.
-
----
-
-## 🏗️ Architecture
-
-* [Architecture Overview](docs/architecture/architecture.md)
-
-Covers the overall platform architecture and how the application, infrastructure, Kubernetes, Helm, CI/CD, GitOps, and observability layers fit together.
-
----
-
-## 🐳 Docker
-
-* [Docker Documentation](docs/docker/docker.md)
-
-Covers:
-
-* Backend and frontend containerization
-* Multi-stage builds
-* Nginx runtime
-* Non-root containers
-* PostgreSQL
-* Docker Compose
-* Container networking
-* Persistent storage
-* Health checks
-* Troubleshooting
-* Security considerations
-
----
-
-## 🏗️ Terraform
-
-* [Terraform Documentation](docs/terraform/README.md)
-* [Terraform Architecture](docs/terraform/architecture.md)
-* [Terraform Bootstrap](docs/terraform/bootstrap.md)
-* [Remote Backend](docs/terraform/backend.md)
-* [Terraform Modules](docs/terraform/modules.md)
-* [Environment Structure](docs/terraform/environment.md)
-* [Terraform Workflow](docs/terraform/workflow.md)
-* [Testing & Validation](docs/terraform/testing.md)
-
-The Terraform documentation covers:
-
-* Infrastructure architecture
-* Bootstrap process
-* Remote state management
-* Reusable modules
-* Environment structure
-* AWS networking
-* IAM
-* Amazon ECR
-* Amazon EKS integration
-* Testing
-* Troubleshooting
-* Engineering decisions
-
----
-
-## ☸️ Kubernetes
-
-* [Kubernetes Architecture](docs/kubernetes/architecture.md)
-* [Kubernetes Workloads](docs/kubernetes/workloads.md)
-* [Kubernetes Networking](docs/kubernetes/networking.md)
-* [Kubernetes Security](docs/kubernetes/security.md)
-* [Kubernetes Testing & Validation](docs/kubernetes/testing.md)
-
-The Kubernetes documentation covers:
-
-* Namespace architecture
-* Workloads
-* PostgreSQL StatefulSet
-* Services
-* Persistent storage
-* Health probes
-* HPA
-* Ingress
-* NetworkPolicies
-* RBAC
-* ResourceQuota and LimitRange
-* Pod Security Standards
-* Kyverno
-* Validation and testing
-* Troubleshooting
-* Engineering decisions
-
----
-
-## ⎈ Helm
-
-* [Helm Architecture](docs/helm/architecture.md)
-* [Helm Deployment & Validation](docs/helm/deployment.md)
-* [Helm Troubleshooting](docs/helm/troubleshooting.md)
-
-The Helm documentation covers:
-
-* Chart architecture
-* `Chart.yaml`
-* `values.yaml`
-* Templates
-* Namespace-aware configuration
-* Application workloads
-* PostgreSQL
-* Persistent storage
-* Services and Ingress
-* ConfigMaps and Secrets
-* Checksum rollouts
-* HPA
-* NetworkPolicies
-* RBAC
-* Resource governance
-* Kyverno
-* Helm validation
-* Minikube deployment
-* Troubleshooting
-* Engineering lessons
-
----
-
-## 🧩 Application
-
-Application documentation covers:
-
-* Backend API architecture
-* Frontend application
-* PostgreSQL integration
-* API endpoints
-* Frontend/backend communication
-* CORS configuration
-* Application troubleshooting
-
-Related documentation:
-
-* `application/application-overview.md`
-* `application/troubleshooting-cors.md`
-
----
-
-## 📋 Requirements
-
-* [Project Requirements](docs/requirements.md)
-
-The requirements document defines the original platform objectives and technical requirements used to guide implementation.
-
-# 🧪 Testing & Validation
-
-Testing is performed at every stage before moving to the next milestone.
-
-## Application Testing
-
-* API health checks
-* Backend API testing
-* PostgreSQL connectivity
-* Frontend API communication
-* Browser validation
-* CORS validation
-
-## Docker Testing
-
-* Docker image builds
-* Container startup validation
-* Docker Compose testing
-* Service-to-service communication
-* PostgreSQL persistence
-* Container health checks
-
-## Terraform Testing
-
-* `terraform fmt`
-* `terraform validate`
-* `terraform plan`
-* Configuration review
-* Module validation
-* AWS resource verification
-
-## Kubernetes Testing
-
-* Manifest validation
-* Namespace validation
-* Deployment validation
-* Service validation
-* StatefulSet validation
-* Persistent storage validation
-* Health probe validation
-* HPA validation
-* NetworkPolicy validation
-* RBAC validation
-* ResourceQuota and LimitRange validation
-* Kyverno policy validation
-* Ingress validation
-* End-to-end application testing
-
-## Helm Testing
-
-* `helm lint`
-* `helm template`
-* Kubernetes dry-run
-* Helm installation
-* Helm upgrade
-* Release status validation
-* Deployment rollout validation
-* Persistent storage validation
-* Ingress/API validation
-* Configuration checksum validation
-* Troubleshooting
-
-Kubernetes and Helm were validated locally using Minikube before the AWS EKS deployment stage to avoid unnecessary infrastructure costs during development.
-
----
-
-# 🛡️ Security Approach
-
-Security is considered throughout the platform rather than being added as a final step.
-
-Current Kubernetes security controls include:
-
-* Pod Security Standards
-* Non-root container execution
-* Security contexts
-* Dropped Linux capabilities
-* Disabled privilege escalation
-* RuntimeDefault seccomp profile
-* Kyverno admission policies
-* Approved container registry enforcement
-* ResourceQuota
-* LimitRange
-* NetworkPolicies
-* RBAC
-* Dedicated ServiceAccounts
-* Kubernetes Secrets
-* Restricted network access
-
-The project also documents security-related failures and policy conflicts encountered during Kubernetes and Minikube testing.
-
----
-
-# 🧭 Engineering Approach
-
-The platform is developed incrementally instead of building the entire system at once.
-
-Each phase follows:
-
-```text
-Plan
-  ↓
-Design
-  ↓
-Implement
-  ↓
-Validate
-  ↓
-Troubleshoot
-  ↓
-Security Review
-  ↓
-Document
-  ↓
-Commit
-  ↓
-Move to Next Phase
-```
-
-The project intentionally documents real implementation problems rather than presenting only the final successful configuration.
-
-Examples include:
-
-* Configuration mistakes
-* Kubernetes policy conflicts
-* Container security issues
-* Networking problems
-* Application connectivity issues
-* Infrastructure validation failures
-* Testing results
-* Engineering trade-offs
-* Lessons learned
-
----
-
-# 🧩 Kubernetes Design Principles
-
-The Kubernetes implementation follows production-oriented principles.
-
-### Separation of Responsibilities
-
-Resources are organized by responsibility:
-
-* Namespace
-* Workloads
-* Services
-* Configuration
-* Secrets
-* Networking
-* Autoscaling
-* RBAC
-* Resource management
-* Security policies
-
-### Stateless Workloads
-
-Frontend and backend applications run as Deployments with multiple replicas.
-
-### Stateful Database
-
-PostgreSQL uses a StatefulSet because the database requires stable identity and persistent storage.
-
-### Service-Based Communication
-
-Applications communicate through Kubernetes Services rather than directly targeting Pod IP addresses.
-
-### Controlled Network Access
-
-NetworkPolicies provide default-deny behavior and explicitly allow required communication.
-
-### Resource Governance
-
-Resource requests, limits, ResourceQuota, and LimitRange help control resource consumption.
-
-### Autoscaling
-
-Horizontal Pod Autoscalers allow frontend and backend workloads to scale based on resource utilization.
-
----
-
-# 🔧 Troubleshooting Philosophy
-
-Troubleshooting is treated as an important part of the engineering process.
-
-Documented troubleshooting includes:
-
-* Application CORS issues
-* Docker container issues
-* Terraform validation and planning issues
-* Kubernetes configuration problems
-* PostgreSQL StatefulSet issues
-* PostgreSQL health probe issues
-* Kyverno admission failures
-* Security policy conflicts
-* NetworkPolicy behavior
-* Ingress configuration
-* Helm namespace configuration
-* Helm template validation
-* ConfigMap and Secret rollout behavior
-* Resource and probe configuration
-
-The goal is to demonstrate how DevOps problems are investigated, corrected, validated, and converted into reusable engineering knowledge.
-
----
-
-# 🤖 AI-Assisted DevOps
-
-AI is used as a technical assistant rather than as a replacement for engineering understanding.
-
-AI assistance supports:
+AI is used to support:
 
 * Application code review
-* Dockerfile analysis
+* Dockerfile analysis and optimization
 * Container security review
 * Terraform code review
 * Terraform plan analysis
@@ -889,7 +335,7 @@ AI assistance supports:
 * Helm troubleshooting
 * CI/CD failure analysis
 * Log analysis
-* Incident investigation
+* Incident root-cause analysis
 * Security recommendations
 * Cost optimization
 
@@ -917,57 +363,689 @@ Test and Validate
 Document Lessons Learned
 ```
 
-AI-generated suggestions are reviewed and verified by the engineer before changes are applied.
+All infrastructure and application changes are reviewed, tested, and verified by the engineer before being applied.
 
-### Example Workflow
+---
+
+## 🎯 Project Philosophy
+
+The project focuses on understanding the **complete DevOps lifecycle**, not simply using individual tools.
+
+Each milestone follows:
 
 ```text
-Kubernetes Issue
-      ↓
-AI-Assisted Troubleshooting
-      ↓
-Configuration Review
-      ↓
-Engineer Verification
-      ↓
-Implementation
-      ↓
-Testing
-      ↓
-Documentation
+Plan
+  ↓
+Design
+  ↓
+Implement
+  ↓
+Validate
+  ↓
+Troubleshoot
+  ↓
+AI-Assisted Analysis
+  ↓
+Document
+  ↓
+Commit
 ```
 
-The goal is to demonstrate practical AI-assisted DevOps workflows while maintaining human ownership of technical decisions.
+The repository intentionally documents real problems, troubleshooting, engineering decisions, and lessons learned rather than showing only successful configurations.
+
+# 🚀 Project Roadmap
+
+## Phase 1 — Application Development ✅
+
+* [x] Backend API
+* [x] `GET /health`
+* [x] `GET /api/products`
+* [x] `POST /api/products`
+* [x] PostgreSQL integration
+* [x] React frontend
+* [x] Frontend/backend communication
+* [x] CORS configuration
+* [x] Application documentation
+
+---
+
+## Phase 2 — Containerization ✅
+
+* [x] Backend Dockerfile
+* [x] Frontend Dockerfile
+* [x] Multi-stage frontend build
+* [x] Nginx runtime
+* [x] Non-root containers
+* [x] PostgreSQL container
+* [x] Docker Compose
+* [x] Container networking
+* [x] Persistent storage
+* [x] Health checks
+* [x] Docker troubleshooting
+* [x] Docker documentation
+
+---
+
+## Phase 3 — Terraform / AWS Infrastructure ✅
+
+* [x] Terraform project structure
+* [x] Terraform bootstrap
+* [x] Remote backend
+* [x] Reusable modules
+* [x] Environment-based structure
+* [x] AWS provider
+* [x] Variables and outputs
+* [x] Terraform validation
+* [x] Terraform formatting
+* [x] Terraform planning
+* [x] VPC
+* [x] Public subnets
+* [x] Private subnets
+* [x] Internet Gateway
+* [x] NAT Gateway
+* [x] Elastic IP
+* [x] Route tables
+* [x] Security groups
+* [x] IAM
+* [x] Amazon ECR
+* [x] Amazon EKS module integration
+* [x] Terraform testing
+* [x] Terraform documentation
+
+---
+
+## Phase 4 — Kubernetes ✅
+
+* [x] Namespace
+* [x] ConfigMaps
+* [x] Secrets
+* [x] PostgreSQL StatefulSet
+* [x] PostgreSQL Services
+* [x] Backend Deployment
+* [x] Frontend Deployment
+* [x] Services
+* [x] Resource requests and limits
+* [x] Startup probes
+* [x] Liveness probes
+* [x] Readiness probes
+* [x] Persistent storage
+* [x] HPA
+* [x] Ingress
+* [x] NetworkPolicies
+* [x] RBAC
+* [x] ServiceAccounts
+* [x] ResourceQuota
+* [x] LimitRange
+* [x] Pod Security Standards
+* [x] Kyverno policies
+* [x] Kubernetes validation
+* [x] Troubleshooting
+* [x] End-to-end local testing
+* [x] Kubernetes documentation
+
+---
+
+## Phase 5 — Helm ✅
+
+* [x] Helm chart structure
+* [x] `Chart.yaml`
+* [x] `values.yaml`
+* [x] Templates
+* [x] Namespace-aware configuration
+* [x] Values-driven configuration
+* [x] Frontend Deployment
+* [x] Backend Deployment
+* [x] PostgreSQL StatefulSet
+* [x] Services
+* [x] Ingress
+* [x] ConfigMaps
+* [x] Secrets
+* [x] Persistent storage
+* [x] HPA
+* [x] NetworkPolicies
+* [x] RBAC
+* [x] ServiceAccounts
+* [x] ResourceQuota
+* [x] LimitRange
+* [x] Kyverno policies
+* [x] Security contexts
+* [x] Health probes
+* [x] Configuration checksum rollouts
+* [x] `helm lint`
+* [x] `helm template`
+* [x] Kubernetes dry-run
+* [x] Helm installation
+* [x] Helm upgrade
+* [x] Rollout validation
+* [x] Ingress validation
+* [x] API validation
+* [x] PostgreSQL troubleshooting
+* [x] Helm troubleshooting documentation
+
+---
+
+## Phase 6 — CI/CD 🚧
+
+* [ ] GitHub Actions
+* [ ] Automated application testing
+* [ ] Docker image builds
+* [ ] Image security scanning
+* [ ] Amazon ECR authentication
+* [ ] Push images to ECR
+* [ ] Helm deployment automation
+* [ ] EKS deployment automation
+* [ ] CI/CD troubleshooting
+* [ ] CI/CD documentation
+
+---
+
+## Phase 7 — GitOps
+
+* [ ] ArgoCD
+* [ ] Git-based deployment configuration
+* [ ] Automated synchronization
+* [ ] Application health monitoring
+* [ ] Environment promotion
+* [ ] GitOps troubleshooting
+* [ ] GitOps documentation
+
+---
+
+## Phase 8 — Observability
+
+* [ ] Prometheus
+* [ ] Grafana
+* [ ] Loki
+* [ ] Centralized logging
+* [ ] Kubernetes metrics
+* [ ] Application metrics
+* [ ] Dashboards
+* [ ] Alerting
+* [ ] Observability troubleshooting
+* [ ] Observability documentation
+
+---
+
+## Phase 9 — AI-Assisted DevOps Operations
+
+* [ ] Terraform plan analysis
+* [ ] Kubernetes troubleshooting
+* [ ] Helm troubleshooting
+* [ ] CI/CD failure analysis
+* [ ] Log analysis
+* [ ] Incident investigation
+* [ ] Security recommendations
+* [ ] Cost optimization
+* [ ] Operational decision support
+
+---
+
+# 🧪 Testing Strategy
+
+Testing is performed continuously throughout development.
+
+The project follows a **local-first → complete platform → final EKS validation** approach.
+
+```text
+Build Component
+      ↓
+Test Locally
+      ↓
+Troubleshoot
+      ↓
+Validate
+      ↓
+Document
+      ↓
+Move to Next Phase
+```
+
+### Application
+
+* API health checks
+* Backend API testing
+* PostgreSQL connectivity
+* Frontend/API communication
+* Browser validation
+* CORS validation
+
+### Docker
+
+* Image builds
+* Container startup
+* Docker Compose
+* Service communication
+* PostgreSQL persistence
+* Health checks
+
+### Terraform
+
+* `terraform fmt`
+* `terraform validate`
+* `terraform plan`
+* Module validation
+* Configuration review
+* AWS resource verification
+
+### Kubernetes
+
+* Manifest validation
+* Workload validation
+* Service validation
+* Storage validation
+* Probe validation
+* HPA validation
+* NetworkPolicy validation
+* RBAC validation
+* Kyverno validation
+* Ingress validation
+* End-to-end testing
+
+### Helm
+
+* `helm lint`
+* `helm template`
+* Kubernetes dry-run
+* Install testing
+* Upgrade testing
+* Rollout validation
+* Storage validation
+* Ingress/API testing
+
+---
+
+# 🧭 Deployment and Validation Strategy
+
+The project intentionally does **not** deploy everything to EKS during development.
+
+### Stage 1 — Local Development
+
+Application and Docker components are developed and tested locally.
+
+### Stage 2 — Minikube
+
+Kubernetes and Helm workloads are deployed and tested on Minikube.
+
+This includes:
+
+```text
+Application
+   ↓
+Docker
+   ↓
+Kubernetes
+   ↓
+Helm
+   ↓
+Networking
+   ↓
+Security
+   ↓
+Storage
+   ↓
+Autoscaling
+   ↓
+End-to-End Testing
+```
+
+### Stage 3 — Complete Platform
+
+The remaining platform components are implemented:
+
+```text
+Helm
+   ↓
+GitHub Actions
+   ↓
+ECR
+   ↓
+ArgoCD
+   ↓
+Observability
+```
+
+### Stage 4 — Final EKS Validation
+
+After the complete platform has been built and validated locally, AWS infrastructure will be provisioned and the complete platform will be tested on Amazon EKS.
+
+```text
+Terraform
+   ↓
+AWS VPC
+   ↓
+ECR
+   ↓
+EKS
+   ↓
+CI/CD
+   ↓
+Helm
+   ↓
+ArgoCD
+   ↓
+Application
+   ↓
+Observability
+   ↓
+End-to-End EKS Validation
+```
+
+This approach keeps development cost-efficient while still providing final cloud deployment experience.
+
+---
+
+# 📊 Current Progress
+
+```text
+Application              ████████████████████ 100%
+Docker                   ████████████████████ 100%
+Terraform                ████████████████████ 100%
+Kubernetes               ████████████████████ 100%
+Helm                     ████████████████████ 100%
+
+GitHub Actions           ░░░░░░░░░░░░░░░░░░░░   0%
+ArgoCD                   ░░░░░░░░░░░░░░░░░░░░   0%
+Observability            ░░░░░░░░░░░░░░░░░░░░   0%
+AI Operations            ░░░░░░░░░░░░░░░░░░░░   0%
+```
+
+### Current Milestone
+
+Completed:
+
+```text
+Application
+    ↓
+Docker
+    ↓
+Terraform / AWS Foundation
+    ↓
+Kubernetes
+    ↓
+Helm
+```
+
+The next major milestone is:
+
+**GitHub Actions CI/CD**
+
+---
+
+# 🛡️ Security Approach
+
+Security is considered throughout the platform.
+
+Current Kubernetes security controls include:
+
+* Pod Security Standards
+* Non-root execution
+* Security contexts
+* Dropped Linux capabilities
+* Disabled privilege escalation
+* RuntimeDefault seccomp
+* Kyverno admission policies
+* Approved registry enforcement
+* ResourceQuota
+* LimitRange
+* NetworkPolicies
+* RBAC
+* Dedicated ServiceAccounts
+* Kubernetes Secrets
+* Restricted network access
+
+Security-related failures and policy conflicts are documented as part of the engineering process.
+
+---
+
+# 🧩 Kubernetes Design Principles
+
+### Separation of Responsibilities
+
+Resources are separated into:
+
+* Workloads
+* Services
+* Configuration
+* Secrets
+* Networking
+* Autoscaling
+* RBAC
+* Resource management
+* Security policies
+
+### Stateless Workloads
+
+Frontend and backend run as Deployments with multiple replicas.
+
+### Stateful Database
+
+PostgreSQL uses a StatefulSet with persistent storage.
+
+### Service-Based Communication
+
+Applications communicate through Kubernetes Services.
+
+### Controlled Network Access
+
+NetworkPolicies control allowed traffic.
+
+### Resource Governance
+
+Requests, limits, ResourceQuota, and LimitRange control resource usage.
+
+### Autoscaling
+
+HPA allows application workloads to scale based on resource utilization.
+
+# 📚 Documentation
+
+Detailed documentation is maintained under `docs/`.
+
+Each major milestone contains focused documentation covering architecture, implementation, testing, troubleshooting, security, and engineering decisions.
+
+---
+
+## 🏗️ Architecture
+
+* [Architecture Overview](docs/architecture/architecture.md)
+
+Covers the overall application, infrastructure, Kubernetes, Helm, CI/CD, GitOps, and observability architecture.
+
+---
+
+## 🐳 Docker
+
+* [Docker Containerization](docs/docker/docker.md)
+
+Covers:
+
+* Backend containerization
+* Frontend multi-stage builds
+* Nginx
+* Non-root containers
+* PostgreSQL
+* Docker Compose
+* Networking
+* Persistent storage
+* Health checks
+* Troubleshooting
+* Security considerations
+
+---
+
+## ☸️ Kubernetes
+
+* [Kubernetes Architecture](docs/kubernetes/architecture.md)
+* [Kubernetes Workloads](docs/kubernetes/workloads.md)
+* [Kubernetes Networking](docs/kubernetes/networking.md)
+* [Kubernetes Security](docs/kubernetes/security.md)
+* [Kubernetes Testing & Validation](docs/kubernetes/testing.md)
+
+Documentation covers:
+
+* Namespace architecture
+* ConfigMaps and Secrets
+* PostgreSQL StatefulSet
+* Application workloads
+* Services
+* Persistent storage
+* Health probes
+* HPA
+* Ingress
+* NetworkPolicies
+* RBAC
+* ResourceQuota
+* LimitRange
+* Pod Security Standards
+* Kyverno
+* Testing
+* Troubleshooting
+* Engineering decisions
+
+---
+
+## ⎈ Helm
+
+* [Helm Architecture](docs/helm/architecture.md)
+* [Helm Deployment & Validation](docs/helm/deployment.md)
+* [Helm Troubleshooting](docs/helm/troubleshooting.md)
+
+Documentation covers:
+
+* Chart architecture
+* Chart structure
+* `Chart.yaml`
+* `values.yaml`
+* Templates
+* Namespace-aware configuration
+* Application workloads
+* PostgreSQL
+* Persistent storage
+* Services
+* Ingress
+* ConfigMaps
+* Secrets
+* HPA
+* NetworkPolicies
+* RBAC
+* Resource governance
+* Kyverno
+* Checksum rollouts
+* Helm validation
+* Minikube deployment
+* API testing
+* Troubleshooting
+
+---
+
+## 🏗️ Terraform
+
+* [Terraform Documentation Home](docs/terraform/README.md)
+* [Terraform Architecture](docs/terraform/architecture.md)
+* [Terraform Bootstrap](docs/terraform/bootstrap.md)
+* [Terraform Remote Backend](docs/terraform/backend.md)
+* [Terraform Modules](docs/terraform/modules.md)
+* [Terraform Environment Structure](docs/terraform/environment.md)
+* [Terraform Workflow](docs/terraform/workflow.md)
+* [Terraform Testing & Validation](docs/terraform/testing.md)
+
+Documentation covers:
+
+* Infrastructure architecture
+* Bootstrap
+* Remote state
+* Modules
+* Environments
+* AWS networking
+* IAM
+* ECR
+* EKS integration
+* Testing
+* Troubleshooting
+* Engineering decisions
+
+---
+
+## 🧩 Application
+
+Application documentation covers:
+
+* Backend API
+* Frontend application
+* PostgreSQL integration
+* API endpoints
+* Frontend/backend communication
+* CORS
+* Application troubleshooting
+
+Current documentation includes:
+
+* `application/application-overview.md`
+* `application/troubleshooting-cors.md`
+
+---
+
+## 📋 Requirements
+
+* [Project Requirements](docs/requirements.md)
+
+The requirements document defines the original platform objectives and technical requirements.
+
+---
+
+# 🔧 Troubleshooting
+
+Troubleshooting is treated as part of the implementation rather than something hidden from the final result.
+
+Documented areas include:
+
+* Application CORS issues
+* Docker issues
+* Terraform validation/planning issues
+* Kubernetes configuration issues
+* PostgreSQL StatefulSet issues
+* PostgreSQL health probes
+* Kyverno admission failures
+* Security policy conflicts
+* NetworkPolicy behavior
+* Ingress configuration
+* Helm namespace configuration
+* Helm template validation
+* Configuration rollout behavior
+* Resource and probe configuration
+
+The goal is to demonstrate how real DevOps problems are investigated, corrected, validated, and documented.
+
+---
 
 # 🧠 Lessons Learned
 
-The project captures lessons learned throughout implementation rather than documenting only the final configuration.
+The project captures engineering lessons throughout development.
 
 Important areas include:
 
-* Understanding why infrastructure components are required
 * Designing reusable Terraform modules
 * Separating infrastructure environments
 * Understanding Kubernetes workload types
 * Choosing StatefulSet for PostgreSQL
-* Understanding Kubernetes Services and DNS
-* Designing default-deny NetworkPolicies
-* Applying least-privilege RBAC
-* Using resource governance controls
-* Understanding admission policies
-* Troubleshooting security policy conflicts
-* Designing reusable Helm templates
-* Managing configuration through Helm values
-* Triggering application rollouts after configuration changes
-* Validating rendered Kubernetes manifests
-* Testing Kubernetes configurations before cloud deployment
-* Using AI as an engineering assistant while maintaining human verification
+* Kubernetes Services and DNS
+* Default-deny NetworkPolicies
+* Least-privilege RBAC
+* Resource governance
+* Admission policies
+* Security policy conflicts
+* Reusable Helm templates
+* Helm values-driven configuration
+* Configuration checksum rollouts
+* Kubernetes manifest validation
+* Local testing before cloud deployment
+* AI-assisted engineering with human verification
 
 ---
 
 # 🚀 Future Platform Architecture
 
-The long-term platform will evolve into a complete DevOps delivery platform.
+The final platform is intended to evolve into:
 
 ```text
 Developer
@@ -993,11 +1071,8 @@ GitHub Actions
         Amazon EKS
             │
       ┌─────┼─────────┐
-      │     │         │
       ▼     ▼         ▼
-  Frontend Backend PostgreSQL
-      │     │         │
-      └─────┼─────────┘
+ Frontend Backend PostgreSQL
             │
             ▼
     Observability Stack
@@ -1007,15 +1082,15 @@ GitHub Actions
  Prometheus Grafana  Loki
 ```
 
-Future phases will introduce:
+Future phases will add:
 
 * Automated CI/CD
-* Container image security scanning
-* Amazon ECR publishing
-* EKS deployment automation
-* Helm-based application delivery
+* Container security scanning
+* ECR publishing
+* EKS deployment
+* Helm-based delivery
 * GitOps with ArgoCD
-* Metrics collection
+* Metrics
 * Centralized logging
 * Dashboards
 * Alerting
@@ -1023,67 +1098,63 @@ Future phases will introduce:
 
 ---
 
-# 🎯 Project Philosophy
+# 🤖 AI-Assisted DevOps Workflow
 
-This project focuses on understanding the **complete DevOps lifecycle**, rather than simply using individual tools.
+AI is integrated throughout the project as an engineering assistant.
+
+Examples:
+
+### Docker
 
 ```text
-Application
+Dockerfile
     ↓
-Containerization
+AI Review
     ↓
-Infrastructure as Code
+Security / Optimization Analysis
     ↓
-Cloud Infrastructure
+Engineer Verification
     ↓
-Kubernetes
-    ↓
-Helm
-    ↓
-CI/CD
-    ↓
-GitOps
-    ↓
-Observability
-    ↓
-Incident Response
-    ↓
-AI-Assisted DevOps
+Build and Test
 ```
 
-Each milestone follows:
+### Terraform
 
 ```text
-Design
-   ↓
-Implement
-   ↓
+Terraform Plan
+    ↓
+AI-Assisted Review
+    ↓
+Risk Identification
+    ↓
+Engineer Verification
+    ↓
+Apply
+```
+
+### Kubernetes
+
+```text
+Kubernetes Failure
+    ↓
+AI-Assisted Troubleshooting
+    ↓
+Configuration Review
+    ↓
+Engineer Validation
+    ↓
+Fix
+    ↓
 Test
-   ↓
-Troubleshoot
-   ↓
-AI-Assisted Analysis
-   ↓
-Document
-   ↓
-Commit
 ```
 
-The objective is to understand not only **what** is being built, but also:
+The same approach will be extended to CI/CD failures, logs, incidents, security, cost optimization, and operational decisions.
 
-* Why it is required
-* How it works
-* How it is validated
-* What failed
-* How problems were solved
-* What engineering trade-offs were made
-* What was learned
+AI suggestions are never treated as automatically correct. The engineer remains responsible for implementation and verification.
 
 ---
 
-# 📌 Definition of Done
-
-A milestone is not considered complete simply because the deployment works.
+# 📌 Completion Criteria
 
 A milestone is considered complete when it has been:
 
@@ -1092,69 +1163,42 @@ A milestone is considered complete when it has been:
 * Tested
 * Troubleshot
 * Security-reviewed
-* Validated
 * Documented
-* Committed to the repository
+* Validated
+* Committed
 
-This ensures the repository demonstrates both the final implementation and the engineering process behind it.
+Successful deployment alone is not considered sufficient.
 
----
+The repository should demonstrate:
 
-# 📅 Next Milestone
-
-## CI/CD Automation with GitHub Actions
-
-The Terraform, Kubernetes, and Helm phases have been completed and validated locally.
-
-The next phase focuses on building the automated delivery pipeline:
-
-```text
-Git Push
-   ↓
-GitHub Actions
-   ↓
-Automated Tests
-   ↓
-Docker Build
-   ↓
-Security Scan
-   ↓
-Amazon ECR
-   ↓
-EKS Deployment
-```
-
-After CI/CD, the platform will progress toward:
-
-```text
-CI/CD
-  ↓
-GitOps with ArgoCD
-  ↓
-Observability
-  ↓
-AI-Assisted Operations
-```
+* **What** was built
+* **Why** it was built
+* **How** it works
+* **How** it was tested
+* **What** failed
+* **How** problems were solved
+* **What** was learned
 
 ---
 
 # 🎯 Long-Term Goal
 
-This repository is intended to become a complete production-style DevOps reference project demonstrating:
+The final goal is a complete production-style DevOps reference platform demonstrating:
 
-* Modern application development
+* Application development
 * Docker containerization
-* Infrastructure as Code with Terraform
-* AWS cloud infrastructure
-* Kubernetes orchestration
-* Helm package management
-* CI/CD automation
-* GitOps workflows
+* Infrastructure as Code
+* AWS infrastructure
+* Kubernetes
+* Helm
+* CI/CD
+* GitOps
 * Observability
-* Security engineering
+* Security
+* Incident response
 * AI-assisted DevOps
 
-The emphasis is on building a portfolio that demonstrates **engineering capability rather than isolated tool usage**.
+The emphasis is on **engineering understanding**, not simply collecting tools in one repository.
 
 ---
 
@@ -1174,29 +1218,108 @@ DevOps Engineer focused on:
 
 ---
 
-## ⭐ Support
+# 🚧 Project Status
+
+**Status:** 🟢 Active Development
+
+### Completed
+
+* Application
+* Docker
+* Terraform
+* AWS infrastructure foundation
+* Kubernetes
+* Helm
+* Local Minikube validation
+* Documentation
+
+### Current
+
+**GitHub Actions CI/CD**
+
+### Upcoming
+
+```text
+GitHub Actions
+      ↓
+Amazon ECR
+      ↓
+EKS Deployment
+      ↓
+ArgoCD
+      ↓
+Observability
+      ↓
+AI-Assisted Operations
+```
+
+---
+
+# ⭐ Support
 
 If you find this project useful:
 
 * ⭐ Star the repository
 * 🍴 Fork the repository
-* 💡 Share feedback or suggestions
-* 🛠️ Follow future project updates as new phases are completed
+* 💡 Share feedback
+* 🛠️ Follow future updates
 
 ---
 
-## 📖 Documentation Philosophy
+# 📅 Next Milestone
 
-Documentation is treated as part of the implementation rather than an afterthought.
+**CI/CD Automation with GitHub Actions**
 
-Detailed documentation records:
+The next phase will build:
 
-* Architecture
-* Implementation
-* Validation
-* Troubleshooting
-* Security considerations
-* Engineering decisions
-* Lessons learned
+```text
+Git Push
+   ↓
+GitHub Actions
+   ↓
+Automated Tests
+   ↓
+Docker Build
+   ↓
+Security Scan
+   ↓
+Amazon ECR
+   ↓
+Helm
+   ↓
+EKS Deployment
+```
 
-The main README intentionally remains concise and acts as the **entry point to the project**, while the `docs/` directory contains the deeper technical documentation.
+After CI/CD, the project will progress to GitOps with ArgoCD and then observability with Prometheus, Grafana, and Loki.
+
+---
+
+# 🙌 Final Project Principle
+
+This repository is built as an engineering project, not a collection of isolated tool demonstrations.
+
+The platform is developed locally, tested progressively, troubleshot openly, documented continuously, and finally integrated and validated on AWS EKS.
+
+The intended journey is:
+
+```text
+Build
+  ↓
+Test on Minikube
+  ↓
+Troubleshoot
+  ↓
+Document
+  ↓
+Complete Full Platform
+  ↓
+Provision AWS Infrastructure
+  ↓
+Deploy Complete Platform to EKS
+  ↓
+Final End-to-End Validation
+  ↓
+Operate and Improve
+```
+
+The objective is to demonstrate the ability to **build, automate, secure, troubleshoot, operate, and continuously improve a production-style DevOps platform**.
