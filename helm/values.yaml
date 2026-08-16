@@ -1,0 +1,172 @@
+backend:
+  replicaCount: 2
+
+  image:
+    repository: docker.io/library/application-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+
+  config:
+    port: "3000"
+    dbHost: postgres-service
+    dbPort: "5432"
+    dbName: products_db
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
+
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    cpu:
+      enabled: true
+      targetUtilization: 70
+    memory:
+      enabled: true
+      targetUtilization: 80
+
+frontend:
+  replicaCount: 2
+
+  image:
+    repository: docker.io/library/application-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+
+  config:
+    apiUrl: /api
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 101
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
+
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    cpu:
+      enabled: true
+      targetUtilization: 70
+    memory:
+      enabled: true
+      targetUtilization: 80
+
+postgres:
+  replicaCount: 1
+
+  image:
+    repository: docker.io/library/postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
+
+  service:
+    port: 5432
+
+  storage:
+    size: 10Gi
+    storageClass: standard
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 70
+    runAsGroup: 70
+    fsGroup: 70
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
+
+ingress:
+  enabled: true
+  className: nginx
+  host: production-app.local
+
+networkPolicy:
+  enabled: true
+
+resourceManagement:
+  resourceQuota:
+    enabled: true
+    requestsCpu: "4"
+    requestsMemory: 4Gi
+    limitsCpu: "8"
+    limitsMemory: 8Gi
+    pods: "20"
+
+  limitRange:
+    enabled: true
+    minCpu: 50m
+    minMemory: 64Mi
+    maxCpu: "2"
+    maxMemory: 2Gi
+    defaultCpu: 500m
+    defaultMemory: 512Mi
+    defaultRequestCpu: 100m
+    defaultRequestMemory: 128Mi
+
+rbac:
+  enabled: true
+
+serviceAccounts:
+  create: true
+
+secrets:
+  create: true
+
+  postgres:
+    database: products_db
+    username: app_user
+    password: ""
+
+kyverno:
+  enabled: true

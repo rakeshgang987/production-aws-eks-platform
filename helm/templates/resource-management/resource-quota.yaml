@@ -1,0 +1,16 @@
+{{- if .Values.resourceManagement.resourceQuota.enabled }}
+apiVersion: v1
+kind: ResourceQuota
+
+metadata:
+  name: production-eks-platform-quota
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  hard:
+    requests.cpu: {{ .Values.resourceManagement.resourceQuota.requestsCpu | quote }}
+    requests.memory: {{ .Values.resourceManagement.resourceQuota.requestsMemory | quote }}
+    limits.cpu: {{ .Values.resourceManagement.resourceQuota.limitsCpu | quote }}
+    limits.memory: {{ .Values.resourceManagement.resourceQuota.limitsMemory | quote }}
+    pods: {{ .Values.resourceManagement.resourceQuota.pods | quote }}
+{{- end }}

@@ -1,0 +1,28 @@
+{{- if .Values.resourceManagement.limitRange.enabled }}
+apiVersion: v1
+kind: LimitRange
+
+metadata:
+  name: production-eks-platform-limits
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  limits:
+    - type: Container
+
+      min:
+        cpu: {{ .Values.resourceManagement.limitRange.minCpu | quote }}
+        memory: {{ .Values.resourceManagement.limitRange.minMemory | quote }}
+
+      max:
+        cpu: {{ .Values.resourceManagement.limitRange.maxCpu | quote }}
+        memory: {{ .Values.resourceManagement.limitRange.maxMemory | quote }}
+
+      default:
+        cpu: {{ .Values.resourceManagement.limitRange.defaultCpu | quote }}
+        memory: {{ .Values.resourceManagement.limitRange.defaultMemory | quote }}
+
+      defaultRequest:
+        cpu: {{ .Values.resourceManagement.limitRange.defaultRequestCpu | quote }}
+        memory: {{ .Values.resourceManagement.limitRange.defaultRequestMemory | quote }}
+{{- end }}

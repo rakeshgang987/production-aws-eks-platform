@@ -1,0 +1,36 @@
+{{- if .Values.kyverno.enabled }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+
+metadata:
+  name: require-approved-registry
+
+  annotations:
+    policies.kyverno.io/title: Require Approved Image Registry
+    policies.kyverno.io/category: Supply Chain Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Containers must use images from approved registries.
+
+spec:
+  validationFailureAction: Enforce
+
+  background: true
+
+  rules:
+    - name: validate-image-registry
+
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+
+      validate:
+        message: "Container images must come from an approved registry."
+
+        pattern:
+          spec:
+            containers:
+              - image: "docker.io/*"
+{{- end }}

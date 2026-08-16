@@ -1,0 +1,18 @@
+{{- if .Values.rbac.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+
+metadata:
+  name: backend-configmap-reader-binding
+  namespace: {{ .Release.Namespace }}
+
+subjects:
+  - kind: ServiceAccount
+    name: backend-service-account
+    namespace: {{ .Release.Namespace }}
+
+roleRef:
+  kind: Role
+  name: backend-configmap-reader
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
