@@ -15,7 +15,13 @@ function App() {
   };
 
   useEffect(() => {
-    fetchProducts();
+    const loadProducts = async () => {
+      const response = await fetch(`${API_URL}/api/products`);
+      const data = await response.json();
+      setProducts(data);
+    };
+
+    loadProducts();
   }, []);
 
   const addProduct = async (event) => {
