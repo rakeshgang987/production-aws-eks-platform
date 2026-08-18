@@ -54,12 +54,15 @@ jobs:
         run: npm ci
 
       - name: Initialize test database
+        env:
+          PGPASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
         run: |
-          docker exec ${{ job.services.postgres.id }} \
-            psql \
+          psql \
+            -h "$DB_HOST" \
+            -p "$DB_PORT" \
             -U "$DB_USER" \
             -d "$DB_NAME" \
-            -f /dev/stdin < ../database/init.sql
+            -f ../database/init.sql
 
       - name: Run tests
         run: npm test
