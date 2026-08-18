@@ -24,7 +24,9 @@ The goal is to build a production-style DevOps platform using:
 
 The project follows a **local-first development strategy**.
 
-Kubernetes and Helm workloads are developed and validated locally using Minikube before AWS deployment. The complete platform will be integrated and then tested on Amazon EKS as the final cloud validation stage.
+Kubernetes and Helm workloads are developed and validated locally using Minikube before AWS deployment. GitHub Actions CI/CD has also been implemented and successfully validated through its automated workflow.
+
+The complete platform will be integrated and then tested on Amazon EKS as the final cloud validation stage.
 
 This reduces unnecessary AWS costs while allowing each layer to be tested independently.
 
@@ -133,7 +135,7 @@ Ingress
                        Persistent Storage
 ```
 
-Minikube is used to validate Kubernetes, Helm, networking, security, and application behavior before EKS.
+Minikube is used to validate Kubernetes, Helm, networking, security, storage, autoscaling, and application behavior before EKS.
 
 ---
 
@@ -218,6 +220,46 @@ Ingress/API testing
 
 ---
 
+## 🔄 CI/CD Architecture
+
+GitHub Actions automates application validation, container image building, image publishing, and Helm deployment workflow steps.
+
+The implemented pipeline follows:
+
+```text
+Code Push / Pull Request
+          ↓
+Backend Tests + PostgreSQL
+          ↓
+Frontend Lint + Build
+          ↓
+Docker Build
+          ↓
+Push Images to Docker Hub
+          ↓
+Helm Validation / Deployment
+```
+
+The CI/CD implementation includes:
+
+* Backend testing with PostgreSQL service container
+* Frontend linting
+* Frontend production build
+* Docker image builds for backend and frontend
+* Docker Hub image publishing
+* Dynamic image tagging
+* Helm validation
+* Helm-based deployment workflow
+* CI/CD troubleshooting and workflow improvements
+
+The complete GitHub Actions workflow has been successfully executed with all jobs passing.
+
+The Kubernetes deployment layer is separately validated locally using Minikube and Helm.
+
+Final AWS EKS integration testing is intentionally deferred until the remaining platform components are completed.
+
+---
+
 ## 📁 Repository Structure
 
 ```text
@@ -264,6 +306,7 @@ production-aws-eks-platform/
 │   ├── helm/
 │   ├── kubernetes/
 │   ├── terraform/
+│   ├── cicd/
 │   └── requirements.md
 │
 ├── scripts/
@@ -310,6 +353,8 @@ production-aws-eks-platform/
 ### CI/CD and GitOps
 
 * GitHub Actions
+* Docker Hub
+* Helm
 * ArgoCD
 
 ### Observability
@@ -452,6 +497,8 @@ The repository intentionally documents real problems, troubleshooting, engineeri
 * [x] Terraform testing
 * [x] Terraform documentation
 
+> **Note:** The AWS infrastructure foundation and EKS Terraform integration are implemented, but the EKS cluster itself is intentionally not provisioned during the current development phase to avoid unnecessary AWS costs. Final EKS deployment and validation will be performed after the complete platform is ready.
+
 ---
 
 ## Phase 4 — Kubernetes ✅
@@ -484,7 +531,6 @@ The repository intentionally documents real problems, troubleshooting, engineeri
 * [x] Kubernetes documentation
 
 ---
-
 ## Phase 5 — Helm ✅
 
 * [x] Helm chart structure
@@ -524,18 +570,27 @@ The repository intentionally documents real problems, troubleshooting, engineeri
 
 ---
 
-## Phase 6 — CI/CD 🚧
+## Phase 6 — CI/CD ✅
 
-* [ ] GitHub Actions
-* [ ] Automated application testing
-* [ ] Docker image builds
-* [ ] Image security scanning
-* [ ] Amazon ECR authentication
-* [ ] Push images to ECR
-* [ ] Helm deployment automation
-* [ ] EKS deployment automation
-* [ ] CI/CD troubleshooting
-* [ ] CI/CD documentation
+* [x] GitHub Actions
+* [x] Automated backend testing
+* [x] PostgreSQL service container for tests
+* [x] Frontend linting
+* [x] Frontend production build
+* [x] Docker image builds
+* [x] Docker Hub authentication
+* [x] Push backend image to Docker Hub
+* [x] Push frontend image to Docker Hub
+* [x] Dynamic image tagging
+* [x] Helm validation
+* [x] Helm deployment workflow
+* [x] CI/CD troubleshooting
+* [x] CI/CD documentation
+* [x] Complete workflow execution
+* [x] All CI/CD jobs passing
+* [x] GitHub Actions Node.js 24-compatible action versions
+
+> **Current CI/CD deployment target:** Kubernetes/Helm on the local Minikube validation environment. Final EKS deployment automation will be completed during the final AWS integration stage.
 
 ---
 
@@ -652,6 +707,21 @@ Move to Next Phase
 * Storage validation
 * Ingress/API testing
 
+### CI/CD
+
+* GitHub Actions workflow validation
+* Backend tests with PostgreSQL
+* Frontend linting
+* Frontend production build
+* Docker image builds
+* Docker Hub authentication
+* Image publishing
+* Dynamic image tagging
+* Helm rendering and validation
+* Helm deployment workflow
+* Complete workflow execution
+* CI/CD troubleshooting
+
 ---
 
 # 🧭 Deployment and Validation Strategy
@@ -688,23 +758,45 @@ Autoscaling
 End-to-End Testing
 ```
 
-### Stage 3 — Complete Platform
+### Stage 3 — CI/CD Validation
 
-The remaining platform components are implemented:
+GitHub Actions automates application testing, container image building, Docker Hub publishing, and Helm deployment workflow validation.
 
 ```text
-Helm
-   ↓
-GitHub Actions
-   ↓
-ECR
-   ↓
-ArgoCD
-   ↓
-Observability
+Git Push / Pull Request
+        ↓
+Backend Tests
+        ↓
+Frontend Lint + Build
+        ↓
+Docker Build
+        ↓
+Docker Hub
+        ↓
+Helm Deployment
+        ↓
+Minikube Validation
 ```
 
-### Stage 4 — Final EKS Validation
+The GitHub Actions workflow has been successfully executed with all jobs passing.
+
+### Stage 4 — Complete Platform
+
+The remaining platform components will be implemented:
+
+```text
+CI/CD
+   ↓
+GitOps
+   ↓
+Observability
+   ↓
+Security Review
+   ↓
+Operational Workflows
+```
+
+### Stage 5 — Final EKS Validation
 
 After the complete platform has been built and validated locally, AWS infrastructure will be provisioned and the complete platform will be tested on Amazon EKS.
 
@@ -742,11 +834,12 @@ Docker                   ██████████████████�
 Terraform                ████████████████████ 100%
 Kubernetes               ████████████████████ 100%
 Helm                     ████████████████████ 100%
+GitHub Actions CI/CD     ████████████████████ 100%
 
-GitHub Actions           ░░░░░░░░░░░░░░░░░░░░   0%
 ArgoCD                   ░░░░░░░░░░░░░░░░░░░░   0%
 Observability            ░░░░░░░░░░░░░░░░░░░░   0%
 AI Operations            ░░░░░░░░░░░░░░░░░░░░   0%
+Final EKS Validation     ░░░░░░░░░░░░░░░░░░░░   0%
 ```
 
 ### Current Milestone
@@ -763,11 +856,13 @@ Terraform / AWS Foundation
 Kubernetes
     ↓
 Helm
+    ↓
+GitHub Actions CI/CD
 ```
 
 The next major milestone is:
 
-**GitHub Actions CI/CD**
+**GitOps with ArgoCD**
 
 ---
 
@@ -794,6 +889,8 @@ Current Kubernetes security controls include:
 * Restricted network access
 
 Security-related failures and policy conflicts are documented as part of the engineering process.
+
+The CI/CD workflow will receive additional security scanning and supply-chain controls during future platform hardening.
 
 ---
 
@@ -836,6 +933,8 @@ Requests, limits, ResourceQuota, and LimitRange control resource usage.
 ### Autoscaling
 
 HPA allows application workloads to scale based on resource utilization.
+
+---
 
 # 📚 Documentation
 
@@ -938,6 +1037,33 @@ Documentation covers:
 
 ---
 
+## 🔄 CI/CD
+
+* [CI/CD Architecture](docs/cicd/architecture.md)
+* [CI/CD Deployment](docs/cicd/deployment.md)
+* [CI/CD Testing & Validation](docs/cicd/testing.md)
+* [CI/CD Troubleshooting](docs/cicd/troubleshooting.md)
+
+Documentation covers:
+
+* GitHub Actions workflow architecture
+* Backend testing
+* PostgreSQL service container
+* Frontend linting and production build
+* Docker image builds
+* Docker Hub authentication
+* Dynamic image tagging
+* Image publishing
+* Helm validation
+* Helm deployment
+* Workflow validation
+* CI/CD troubleshooting
+* GitHub Actions action-version updates
+* Local Minikube deployment validation
+* Final EKS integration strategy
+
+---
+
 ## 🏗️ Terraform
 
 * [Terraform Documentation Home](docs/terraform/README.md)
@@ -1013,6 +1139,10 @@ Documented areas include:
 * Helm template validation
 * Configuration rollout behavior
 * Resource and probe configuration
+* CI/CD workflow failures
+* Docker image publishing issues
+* Helm deployment workflow issues
+* GitHub Actions action-version compatibility
 
 The goal is to demonstrate how real DevOps problems are investigated, corrected, validated, and documented.
 
@@ -1039,6 +1169,11 @@ Important areas include:
 * Configuration checksum rollouts
 * Kubernetes manifest validation
 * Local testing before cloud deployment
+* Automated application testing
+* Container image lifecycle management
+* CI/CD pipeline design
+* Helm-based deployment automation
+* GitHub Actions troubleshooting
 * AI-assisted engineering with human verification
 
 ---
@@ -1082,9 +1217,10 @@ GitHub Actions
  Prometheus Grafana  Loki
 ```
 
+The architecture above represents the **target platform**. Some components, including ECR-based CI/CD, ArgoCD, observability, and final EKS integration, are future milestones.
+
 Future phases will add:
 
-* Automated CI/CD
 * Container security scanning
 * ECR publishing
 * EKS deployment
@@ -1230,26 +1366,30 @@ DevOps Engineer focused on:
 * AWS infrastructure foundation
 * Kubernetes
 * Helm
+* GitHub Actions CI/CD
 * Local Minikube validation
-* Documentation
+* CI/CD workflow validation
+* Project documentation
 
 ### Current
 
-**GitHub Actions CI/CD**
+**GitOps with ArgoCD**
 
 ### Upcoming
 
 ```text
-GitHub Actions
-      ↓
-Amazon ECR
-      ↓
-EKS Deployment
-      ↓
 ArgoCD
-      ↓
-Observability
-      ↓
+   ↓
+Prometheus + Grafana
+   ↓
+Loki
+   ↓
+Security Hardening
+   ↓
+Final AWS EKS Integration
+   ↓
+End-to-End EKS Validation
+   ↓
 AI-Assisted Operations
 ```
 
@@ -1268,29 +1408,23 @@ If you find this project useful:
 
 # 📅 Next Milestone
 
-**CI/CD Automation with GitHub Actions**
+**GitOps with ArgoCD**
 
-The next phase will build:
+The next phase will introduce GitOps-based deployment management:
 
 ```text
-Git Push
-   ↓
-GitHub Actions
-   ↓
-Automated Tests
-   ↓
-Docker Build
-   ↓
-Security Scan
-   ↓
-Amazon ECR
-   ↓
+Git Repository
+      ↓
+ArgoCD
+      ↓
 Helm
-   ↓
-EKS Deployment
+      ↓
+Kubernetes
+      ↓
+Application
 ```
 
-After CI/CD, the project will progress to GitOps with ArgoCD and then observability with Prometheus, Grafana, and Loki.
+After GitOps, the project will progress to observability with Prometheus, Grafana, and Loki, followed by final AWS EKS integration and end-to-end validation.
 
 ---
 
@@ -1311,7 +1445,9 @@ Troubleshoot
   ↓
 Document
   ↓
-Complete Full Platform
+Automate with CI/CD
+  ↓
+Build Complete Platform
   ↓
 Provision AWS Infrastructure
   ↓
