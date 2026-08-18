@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   push:
@@ -8,7 +8,14 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
+
+  # ============================================================
+  # CI - Backend Tests
+  # ============================================================
   backend-test:
     name: Backend Tests
     runs-on: ubuntu-latest
@@ -67,6 +74,10 @@ jobs:
       - name: Run tests
         run: npm test
 
+
+  # ============================================================
+  # CI - Frontend Lint and Build
+  # ============================================================
   frontend-check:
     name: Frontend Lint and Build
     runs-on: ubuntu-latest
@@ -94,3 +105,99 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+
+
+  # ============================================================
+  # CD - Build and Push Docker Images
+  # ============================================================
+  docker-build-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+
+    needs:
+      - backend-test
+      - frontend-check
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build backend image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/production-aws-eks-platform-backend:${IMAGE_TAG} \
+            -f application/backend/Dockerfile \
+            application
+
+      - name: Build frontend image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/production-aws-eks-platform-frontend:${IMAGE_TAG} \
+            -f application/frontend/Dockerfile \
+            application
+
+      - name: Push backend image
+        run: |
+          docker push \
+            ${{ secrets.DOCKERHUB_USERNAME }}/production-aws-eks-platform-backend:${IMAGE_TAG}
+
+      - name: Push frontend image
+        run: |
+          docker push \
+            ${{ secrets.DOCKERHUB_USERNAME }}/production-aws-eks-platform-frontend:${IMAGE_TAG}
+
+
+  # ============================================================
+  # CD - Helm Deployment
+  # ============================================================
+  helm-deploy:
+    name: Helm Deployment
+    runs-on: ubuntu-latest
+
+    needs:
+      - docker-build-push
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.18.4
+
+      - name: Helm lint
+        run: helm lint helm
+
+      - name: Helm template validation
+        run: |
+          helm template production-aws-eks-platform helm \
+            --namespace production-eks-platform-helm \
+            --set backend.image.repository=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/production-aws-eks-platform-backend \
+            --set backend.image.tag="${IMAGE_TAG}" \
+            --set frontend.image.repository=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/production-aws-eks-platform-frontend \
+            --set frontend.image.tag="${IMAGE_TAG}"
+
+      - name: Display deployment image tags
+        run: |
+          echo "Backend image:"
+          echo "docker.io/${{ secrets.DOCKERHUB_USERNAME }}/production-aws-eks-platform-backend:${IMAGE_TAG}"
+
+          echo "Frontend image:"
+          echo "docker.io/${{ secrets.DOCKERHUB_USERNAME }}/production-aws-eks-platform-frontend:${IMAGE_TAG}"

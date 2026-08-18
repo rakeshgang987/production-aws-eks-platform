@@ -2,7 +2,7 @@ backend:
   replicaCount: 2
 
   image:
-    repository: docker.io/library/application-backend
+    repository: docker.io/rakeshgang163/production-aws-eks-platform-backend
     tag: latest
     pullPolicy: IfNotPresent
 
@@ -50,7 +50,7 @@ frontend:
   replicaCount: 2
 
   image:
-    repository: docker.io/library/application-frontend
+    repository: docker.io/rakeshgang163/production-aws-eks-platform-frontend
     tag: latest
     pullPolicy: IfNotPresent
 
