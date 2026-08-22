@@ -1,5 +1,5 @@
 backend:
-  replicaCount: 2
+  replicaCount: 3
 
   image:
     repository: docker.io/rakeshgang163/production-aws-eks-platform-backend
