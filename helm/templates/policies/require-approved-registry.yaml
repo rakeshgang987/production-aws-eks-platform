@@ -29,8 +29,21 @@ spec:
       validate:
         message: "Container images must come from an approved registry."
 
-        pattern:
-          spec:
-            containers:
-              - image: "docker.io/*"
+        anyPattern:
+          - spec:
+              containers:
+                - image: "docker.io/*"
+
+          - spec:
+              containers:
+                - image: "quay.io/*"
+
+          - spec:
+              containers:
+                - image: "ghcr.io/*"
+
+          - spec:
+              containers:
+                - image: "public.ecr.aws/*"
+
 {{- end }}

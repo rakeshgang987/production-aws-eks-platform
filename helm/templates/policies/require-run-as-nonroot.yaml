@@ -10,7 +10,7 @@ metadata:
     policies.kyverno.io/category: Pod Security
     policies.kyverno.io/severity: medium
     policies.kyverno.io/description: >-
-      Pods must explicitly run as non-root.
+      Pods must explicitly run as non-root, except for the Argo CD control-plane namespace.
 
 spec:
   validationFailureAction: Enforce
@@ -25,6 +25,12 @@ spec:
           - resources:
               kinds:
                 - Pod
+
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - argocd
 
       validate:
         message: "Pods must set securityContext.runAsNonRoot to true."
