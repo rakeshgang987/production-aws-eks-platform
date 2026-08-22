@@ -17,6 +17,14 @@ spec:
     server: https://kubernetes.default.svc
     namespace: production-eks-platform-helm
 
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      name: backend
+      jsonPointers:
+        - /spec/replicas
+
+
   syncPolicy:
     automated:
       prune: true
