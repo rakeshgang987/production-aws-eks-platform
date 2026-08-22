@@ -26,6 +26,8 @@ The project follows a **local-first development strategy**.
 
 Kubernetes and Helm workloads are developed and validated locally using Minikube before AWS deployment. GitHub Actions CI/CD has also been implemented and successfully validated through its automated workflow.
 
+GitOps with ArgoCD has now been implemented and validated locally on Minikube. ArgoCD continuously monitors the Git repository and reconciles the Kubernetes application state from the Helm chart.
+
 The complete platform will be integrated and then tested on Amazon EKS as the final cloud validation stage.
 
 This reduces unnecessary AWS costs while allowing each layer to be tested independently.
@@ -36,27 +38,49 @@ This reduces unnecessary AWS costs while allowing each layer to be tested indepe
 
 ```text
 Application
+
     ↓
+
 Docker
+
     ↓
+
 Terraform
+
     ↓
+
 AWS Infrastructure
+
     ↓
+
 Kubernetes
+
     ↓
+
 Helm
+
     ↓
+
 CI/CD
+
     ↓
+
 GitOps
+
     ↓
+
 Observability
+
     ↓
+
 Incident Response
+
     ↓
+
 AI-Assisted DevOps
+
     ↓
+
 Final EKS Integration Testing
 ```
 
@@ -66,27 +90,46 @@ Final EKS Integration Testing
 
 ```text
                          Users
+
                            │
+
                            ▼
+
                       Ingress
+
                            │
+
               ┌────────────┴────────────┐
+
               ▼                         ▼
+
          Frontend                  Backend API
+
        React + Nginx             Node + Express
+
                                       │
+
                                       ▼
+
                                   PostgreSQL
 
 
                      Amazon EKS
+
                          │
+
               ┌──────────┼──────────┐
+
               ▼          ▼          ▼
+
             Helm      ArgoCD   Observability
+
                                   │
+
                          ┌────────┼────────┐
+
                          ▼        ▼        ▼
+
                      Prometheus Grafana  Loki
 ```
 
@@ -100,11 +143,17 @@ The complete architecture will be implemented progressively rather than deployed
 
 ```text
 Frontend
+
    │
+
    ▼
+
 Backend API
+
    │
+
    ▼
+
 PostgreSQL
 ```
 
@@ -120,22 +169,35 @@ Docker Compose provides:
 
 ```text
 Ingress
+
    │
+
    ├── Frontend Service → Frontend Pods
+
    │
+
    └── Backend Service → Backend Pods
+
                               │
+
                               ▼
+
                        PostgreSQL Service
+
                               │
+
                               ▼
+
                      PostgreSQL StatefulSet
+
                               │
+
                               ▼
+
                        Persistent Storage
 ```
 
-Minikube is used to validate Kubernetes, Helm, networking, security, storage, autoscaling, and application behavior before EKS.
+Minikube is used to validate Kubernetes, Helm, networking, security, storage, autoscaling, GitOps, and application behavior before EKS.
 
 ---
 
@@ -180,6 +242,7 @@ The Kubernetes application stack is packaged as a reusable Helm chart.
 
 ```text
 helm/
+
 ├── Chart.yaml
 ├── values.yaml
 ├── .helmignore
@@ -206,15 +269,25 @@ Helm validation is performed locally using:
 
 ```text
 helm lint
+
     ↓
+
 helm template
+
     ↓
+
 kubectl dry-run
+
     ↓
+
 helm upgrade --install
+
     ↓
+
 Rollout validation
+
     ↓
+
 Ingress/API testing
 ```
 
@@ -228,15 +301,25 @@ The implemented pipeline follows:
 
 ```text
 Code Push / Pull Request
+
           ↓
+
 Backend Tests + PostgreSQL
+
           ↓
+
 Frontend Lint + Build
+
           ↓
+
 Docker Build
+
           ↓
+
 Push Images to Docker Hub
+
           ↓
+
 Helm Validation / Deployment
 ```
 
@@ -264,6 +347,7 @@ Final AWS EKS integration testing is intentionally deferred until the remaining 
 
 ```text
 production-aws-eks-platform/
+
 │
 ├── application/
 │   ├── backend/
@@ -300,6 +384,9 @@ production-aws-eks-platform/
 │   ├── .helmignore
 │   └── templates/
 │
+├── argocd/
+│   └── application.yaml
+│
 ├── docs/
 │   ├── architecture/
 │   ├── docker/
@@ -307,14 +394,14 @@ production-aws-eks-platform/
 │   ├── kubernetes/
 │   ├── terraform/
 │   ├── cicd/
+│   ├── gitops/
+│   │   └── argocd.md
 │   └── requirements.md
 │
 ├── scripts/
+│
 └── README.md
 ```
-
----
-
 ## 🧰 Technology Stack
 
 ### Application
@@ -386,25 +473,43 @@ AI is used to support:
 
 The workflow is:
 
-```text
+```text id="n7f1f0"
 Engineer
+
     │
+
     ▼
+
 Define Problem
+
     │
+
     ▼
+
 AI-Assisted Analysis
+
     │
+
     ▼
+
 Review Suggestions
+
     │
+
     ▼
+
 Implement Changes
+
     │
+
     ▼
+
 Test and Validate
+
     │
+
     ▼
+
 Document Lessons Learned
 ```
 
@@ -418,21 +523,35 @@ The project focuses on understanding the **complete DevOps lifecycle**, not simp
 
 Each milestone follows:
 
-```text
+```text id="1cq7ep"
 Plan
+
   ↓
+
 Design
+
   ↓
+
 Implement
+
   ↓
+
 Validate
+
   ↓
+
 Troubleshoot
+
   ↓
+
 AI-Assisted Analysis
+
   ↓
+
 Document
+
   ↓
+
 Commit
 ```
 
@@ -531,6 +650,7 @@ The repository intentionally documents real problems, troubleshooting, engineeri
 * [x] Kubernetes documentation
 
 ---
+
 ## Phase 5 — Helm ✅
 
 * [x] Helm chart structure
@@ -594,15 +714,49 @@ The repository intentionally documents real problems, troubleshooting, engineeri
 
 ---
 
-## Phase 7 — GitOps
+## Phase 7 — GitOps ✅
 
-* [ ] ArgoCD
-* [ ] Git-based deployment configuration
-* [ ] Automated synchronization
-* [ ] Application health monitoring
-* [ ] Environment promotion
-* [ ] GitOps troubleshooting
-* [ ] GitOps documentation
+* [x] ArgoCD installation and validation
+* [x] ArgoCD CRDs
+* [x] Git-based deployment configuration
+* [x] ArgoCD Application manifest
+* [x] Helm-based GitOps deployment
+* [x] Automated synchronization
+* [x] Automated pruning
+* [x] Self-healing configuration
+* [x] Application health monitoring
+* [x] Git-to-Kubernetes reconciliation
+* [x] Replica scaling change validation
+* [x] GitOps troubleshooting
+* [x] GitOps documentation
+
+ArgoCD has been successfully validated on Minikube.
+
+The ArgoCD Application monitors the repository's `helm` directory and deploys the chart into the `production-eks-platform-helm` namespace.
+
+The deployment flow is:
+
+```text id="5fjw5j"
+Git Repository
+
+      ↓
+
+ArgoCD
+
+      ↓
+
+Helm Chart
+
+      ↓
+
+Kubernetes
+
+      ↓
+
+Application
+```
+
+Changes committed to Git can now be reconciled automatically by ArgoCD without manually running `helm upgrade`.
 
 ---
 
@@ -641,17 +795,27 @@ Testing is performed continuously throughout development.
 
 The project follows a **local-first → complete platform → final EKS validation** approach.
 
-```text
+```text id="t9m9i2"
 Build Component
+
       ↓
+
 Test Locally
+
       ↓
+
 Troubleshoot
+
       ↓
+
 Validate
+
       ↓
+
 Document
+
       ↓
+
 Move to Next Phase
 ```
 
@@ -722,7 +886,19 @@ Move to Next Phase
 * Complete workflow execution
 * CI/CD troubleshooting
 
----
+### GitOps
+
+* ArgoCD installation validation
+* ArgoCD CRD validation
+* Application manifest validation
+* Git repository connectivity
+* Helm source reconciliation
+* Automated sync validation
+* Self-healing validation
+* Prune configuration validation
+* Application health validation
+* Git-based replica change validation
+* GitOps troubleshooting
 
 # 🧭 Deployment and Validation Strategy
 
@@ -738,23 +914,43 @@ Kubernetes and Helm workloads are deployed and tested on Minikube.
 
 This includes:
 
-```text
+```text id="4yk5e2"
 Application
+
    ↓
+
 Docker
+
    ↓
+
 Kubernetes
+
    ↓
+
 Helm
+
    ↓
+
 Networking
+
    ↓
+
 Security
+
    ↓
+
 Storage
+
    ↓
+
 Autoscaling
+
    ↓
+
+GitOps
+
+   ↓
+
 End-to-End Testing
 ```
 
@@ -762,63 +958,144 @@ End-to-End Testing
 
 GitHub Actions automates application testing, container image building, Docker Hub publishing, and Helm deployment workflow validation.
 
-```text
+```text id="q9p1cw"
 Git Push / Pull Request
+
         ↓
+
 Backend Tests
+
         ↓
+
 Frontend Lint + Build
+
         ↓
+
 Docker Build
+
         ↓
+
 Docker Hub
+
         ↓
+
 Helm Deployment
+
         ↓
+
 Minikube Validation
 ```
 
 The GitHub Actions workflow has been successfully executed with all jobs passing.
 
-### Stage 4 — Complete Platform
+### Stage 4 — GitOps Validation
+
+ArgoCD has been installed and validated locally on Minikube.
+
+The GitOps workflow is:
+
+```text id="0y0x7z"
+Git Repository
+
+      ↓
+
+ArgoCD
+
+      ↓
+
+Helm
+
+      ↓
+
+Kubernetes
+
+      ↓
+
+Application
+```
+
+The ArgoCD Application is configured with:
+
+* Git repository as the source of truth
+* Helm chart as the deployment source
+* Automated synchronization
+* Automated pruning
+* Self-healing
+* Application health monitoring
+
+Git changes are automatically reconciled by ArgoCD, removing the need to manually execute `helm upgrade` for normal Git-driven deployment changes.
+
+Detailed documentation:
+
+* [ArgoCD / GitOps Documentation](docs/gitops/argocd.md)
+
+### Stage 5 — Complete Platform
 
 The remaining platform components will be implemented:
 
-```text
+```text id="q8u0e8"
 CI/CD
+
    ↓
+
 GitOps
+
    ↓
+
 Observability
+
    ↓
+
 Security Review
+
    ↓
+
 Operational Workflows
 ```
 
-### Stage 5 — Final EKS Validation
+CI/CD and GitOps are already implemented and validated locally. The next major platform component is observability.
+
+### Stage 6 — Final EKS Validation
 
 After the complete platform has been built and validated locally, AWS infrastructure will be provisioned and the complete platform will be tested on Amazon EKS.
 
-```text
+```text id="9m3d9p"
 Terraform
+
    ↓
+
 AWS VPC
+
    ↓
+
 ECR
+
    ↓
+
 EKS
+
    ↓
+
 CI/CD
+
    ↓
+
 Helm
+
    ↓
+
 ArgoCD
+
    ↓
+
 Application
+
    ↓
+
 Observability
+
    ↓
+
 End-to-End EKS Validation
 ```
 
@@ -828,17 +1105,25 @@ This approach keeps development cost-efficient while still providing final cloud
 
 # 📊 Current Progress
 
-```text
+```text id="d8n2k4"
 Application              ████████████████████ 100%
+
 Docker                   ████████████████████ 100%
+
 Terraform                ████████████████████ 100%
+
 Kubernetes               ████████████████████ 100%
+
 Helm                     ████████████████████ 100%
+
 GitHub Actions CI/CD     ████████████████████ 100%
 
-ArgoCD                   ░░░░░░░░░░░░░░░░░░░░   0%
+ArgoCD / GitOps          ████████████████████ 100%
+
 Observability            ░░░░░░░░░░░░░░░░░░░░   0%
+
 AI Operations            ░░░░░░░░░░░░░░░░░░░░   0%
+
 Final EKS Validation     ░░░░░░░░░░░░░░░░░░░░   0%
 ```
 
@@ -846,23 +1131,37 @@ Final EKS Validation     ░░░░░░░░░░░░░░░░░░�
 
 Completed:
 
-```text
+```text id="5cqf1x"
 Application
+
     ↓
+
 Docker
+
     ↓
+
 Terraform / AWS Foundation
+
     ↓
+
 Kubernetes
+
     ↓
+
 Helm
+
     ↓
+
 GitHub Actions CI/CD
+
+    ↓
+
+ArgoCD GitOps
 ```
 
 The next major milestone is:
 
-**GitOps with ArgoCD**
+**Observability with Prometheus, Grafana, and Loki**
 
 ---
 
@@ -887,6 +1186,13 @@ Current Kubernetes security controls include:
 * Dedicated ServiceAccounts
 * Kubernetes Secrets
 * Restricted network access
+
+The approved-container-registry policy supports the registries required by the platform and its supporting components, including:
+
+* Docker Hub
+* Quay
+* GitHub Container Registry
+* AWS Public ECR
 
 Security-related failures and policy conflicts are documented as part of the engineering process.
 
@@ -933,6 +1239,12 @@ Requests, limits, ResourceQuota, and LimitRange control resource usage.
 ### Autoscaling
 
 HPA allows application workloads to scale based on resource utilization.
+
+### GitOps-Based Delivery
+
+ArgoCD manages Kubernetes application state from Git and continuously reconciles the desired state defined by the repository.
+
+This separates application configuration from manual cluster operations and provides a repeatable deployment model.
 
 ---
 
@@ -1064,6 +1376,29 @@ Documentation covers:
 
 ---
 
+## 🔁 GitOps
+
+* [ArgoCD / GitOps Documentation](docs/gitops/argocd.md)
+
+Documentation covers:
+
+* ArgoCD installation
+* ArgoCD components and CRDs
+* ArgoCD Application configuration
+* Git repository integration
+* Helm-based GitOps deployment
+* Automated synchronization
+* Automated pruning
+* Self-healing
+* Application health monitoring
+* Git-based configuration changes
+* Replica scaling validation
+* GitOps troubleshooting
+* Local Minikube validation
+* EKS GitOps strategy
+
+---
+
 ## 🏗️ Terraform
 
 * [Terraform Documentation Home](docs/terraform/README.md)
@@ -1089,8 +1424,6 @@ Documentation covers:
 * Testing
 * Troubleshooting
 * Engineering decisions
-
----
 
 ## 🧩 Application
 
@@ -1127,7 +1460,7 @@ Documented areas include:
 
 * Application CORS issues
 * Docker issues
-* Terraform validation/planning issues
+* Terraform validation and planning issues
 * Kubernetes configuration issues
 * PostgreSQL StatefulSet issues
 * PostgreSQL health probes
@@ -1143,6 +1476,7 @@ Documented areas include:
 * Docker image publishing issues
 * Helm deployment workflow issues
 * GitHub Actions action-version compatibility
+* ArgoCD synchronization and GitOps behavior
 
 The goal is to demonstrate how real DevOps problems are investigated, corrected, validated, and documented.
 
@@ -1174,6 +1508,8 @@ Important areas include:
 * CI/CD pipeline design
 * Helm-based deployment automation
 * GitHub Actions troubleshooting
+* GitOps and declarative deployment management
+* ArgoCD automated synchronization
 * AI-assisted engineering with human verification
 
 ---
@@ -1217,7 +1553,7 @@ GitHub Actions
  Prometheus Grafana  Loki
 ```
 
-The architecture above represents the **target platform**. Some components, including ECR-based CI/CD, ArgoCD, observability, and final EKS integration, are future milestones.
+The architecture above represents the **target platform**. The current repository already includes the ArgoCD GitOps configuration and local Minikube validation. ECR-based delivery, observability, and final EKS integration remain future milestones.
 
 Future phases will add:
 
@@ -1225,10 +1561,10 @@ Future phases will add:
 * ECR publishing
 * EKS deployment
 * Helm-based delivery
-* GitOps with ArgoCD
-* Metrics
-* Centralized logging
-* Dashboards
+* Enhanced GitOps workflows
+* Prometheus metrics
+* Grafana dashboards
+* Loki centralized logging
 * Alerting
 * AI-assisted operational workflows
 
@@ -1237,8 +1573,6 @@ Future phases will add:
 # 🤖 AI-Assisted DevOps Workflow
 
 AI is integrated throughout the project as an engineering assistant.
-
-Examples:
 
 ### Docker
 
@@ -1284,7 +1618,7 @@ Fix
 Test
 ```
 
-The same approach will be extended to CI/CD failures, logs, incidents, security, cost optimization, and operational decisions.
+The same approach is extended to CI/CD failures, GitOps synchronization issues, logs, incidents, security, cost optimization, and operational decisions.
 
 AI suggestions are never treated as automatically correct. The engineer remains responsible for implementation and verification.
 
@@ -1369,20 +1703,19 @@ DevOps Engineer focused on:
 * GitHub Actions CI/CD
 * Local Minikube validation
 * CI/CD workflow validation
+* ArgoCD GitOps deployment
+* Automated ArgoCD synchronization
+* GitOps documentation
 * Project documentation
 
 ### Current
 
-**GitOps with ArgoCD**
+**Observability with Prometheus, Grafana, and Loki**
 
 ### Upcoming
 
 ```text
-ArgoCD
-   ↓
-Prometheus + Grafana
-   ↓
-Loki
+Observability
    ↓
 Security Hardening
    ↓
@@ -1408,23 +1741,25 @@ If you find this project useful:
 
 # 📅 Next Milestone
 
-**GitOps with ArgoCD**
+**Observability with Prometheus, Grafana, and Loki**
 
-The next phase will introduce GitOps-based deployment management:
+The next phase will introduce monitoring and centralized logging:
 
 ```text
-Git Repository
-      ↓
-ArgoCD
-      ↓
-Helm
-      ↓
-Kubernetes
-      ↓
-Application
+Kubernetes Workloads
+        │
+        ├── Metrics ──→ Prometheus
+        │                   │
+        │                   ▼
+        │                Grafana
+        │
+        └── Logs ─────→ Loki
+                            │
+                            ▼
+                         Grafana
 ```
 
-After GitOps, the project will progress to observability with Prometheus, Grafana, and Loki, followed by final AWS EKS integration and end-to-end validation.
+After observability, the project will progress toward security hardening, final AWS EKS integration, end-to-end validation, and AI-assisted operational workflows.
 
 ---
 
@@ -1432,7 +1767,7 @@ After GitOps, the project will progress to observability with Prometheus, Grafan
 
 This repository is built as an engineering project, not a collection of isolated tool demonstrations.
 
-The platform is developed locally, tested progressively, troubleshot openly, documented continuously, and finally integrated and validated on AWS EKS.
+The platform is developed locally, tested progressively, troubleshot openly, documented continuously, automated with CI/CD and GitOps, and finally integrated and validated on AWS EKS.
 
 The intended journey is:
 
@@ -1446,6 +1781,10 @@ Troubleshoot
 Document
   ↓
 Automate with CI/CD
+  ↓
+Implement GitOps
+  ↓
+Add Observability
   ↓
 Build Complete Platform
   ↓
