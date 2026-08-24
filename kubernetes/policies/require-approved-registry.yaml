@@ -50,4 +50,4 @@ spec:
         foreach:
           - list: "request.object.spec.jobTemplate.spec.template.spec.containers[]"
             pattern:
-              image: "docker.io/* | quay.io/* | ghcr.io/* | public.ecr.aws/*"
+              image: "docker.io/* | quay.io/* | ghcr.io/* | public.ecr.aws/* | registry.k8s.io/*"
