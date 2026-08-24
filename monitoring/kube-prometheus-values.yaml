@@ -4,7 +4,7 @@ kube-state-metrics:
     repository: kube-state-metrics/kube-state-metrics
     tag: v2.20.0
     pullPolicy: IfNotPresent
-    
+
 grafana:
   enabled: true
 
