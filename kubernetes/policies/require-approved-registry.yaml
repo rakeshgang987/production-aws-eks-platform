@@ -17,18 +17,37 @@ spec:
   background: true
 
   rules:
-    - name: validate-image-registry
+    - name: validate-workload-image-registry
 
       match:
         any:
           - resources:
               kinds:
-                - Pod
+                - Deployment
+                - StatefulSet
+                - DaemonSet
+                - Job
 
       validate:
         message: "Container images must come from an approved registry."
 
-        pattern:
-          spec:
-            containers:
-              - image: "docker.io/*"
+        foreach:
+          - list: "request.object.spec.template.spec.containers[]"
+            pattern:
+              image: "docker.io/* | quay.io/* | ghcr.io/* | public.ecr.aws/*"
+
+    - name: validate-cronjob-image-registry
+
+      match:
+        any:
+          - resources:
+              kinds:
+                - CronJob
+
+      validate:
+        message: "Container images must come from an approved registry."
+
+        foreach:
+          - list: "request.object.spec.jobTemplate.spec.template.spec.containers[]"
+            pattern:
+              image: "docker.io/* | quay.io/* | ghcr.io/* | public.ecr.aws/*"
